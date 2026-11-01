@@ -23,7 +23,7 @@ class HttpConsoleLog
     public static function write(array $record): void
     {
         $dir = dirname(self::path());
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             @mkdir($dir, 0775, true);
         }
 
@@ -34,7 +34,7 @@ class HttpConsoleLog
             return;
         }
 
-        @file_put_contents(self::path(), $line . PHP_EOL, FILE_APPEND | LOCK_EX);
+        @file_put_contents(self::path(), $line.PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -45,16 +45,16 @@ class HttpConsoleLog
     public static function pullAll(): array
     {
         $path = self::path();
-        if (!is_file($path)) {
+        if (! is_file($path)) {
             return [];
         }
 
         $handle = @fopen($path, 'c+');
-        if (!$handle) {
+        if (! $handle) {
             return [];
         }
 
-        if (!@flock($handle, LOCK_EX)) {
+        if (! @flock($handle, LOCK_EX)) {
             @fclose($handle);
 
             return [];
@@ -98,17 +98,17 @@ class HttpConsoleLog
     public static function pullLatest(): ?array
     {
         $path = self::path();
-        if (!is_file($path)) {
+        if (! is_file($path)) {
             return null;
         }
 
         $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if (!is_array($lines) || $lines === []) {
+        if (! is_array($lines) || $lines === []) {
             return null;
         }
 
         $first = array_shift($lines);
-        @file_put_contents($path, $lines === [] ? '' : implode(PHP_EOL, $lines) . PHP_EOL, LOCK_EX);
+        @file_put_contents($path, $lines === [] ? '' : implode(PHP_EOL, $lines).PHP_EOL, LOCK_EX);
 
         $decoded = json_decode((string) $first, true);
 

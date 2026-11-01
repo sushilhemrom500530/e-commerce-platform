@@ -57,12 +57,12 @@ return [
     | Log Line Format
     |--------------------------------------------------------------------------
     |
+    | 'nestjs' - Classic NestJS two-line access + incoming request json line (Default).
     | 'badge'  - Modern single-line badge with method, path, status, latency, client.
-    | 'nestjs' - Classic NestJS two-line access + incoming request json line.
     | 'both'   - Modern decorated badge line + NestJS incoming request json line.
     |
     */
-    'format' => env('REQUEST_LOGGER_FORMAT', 'badge'),
+    'format' => env('REQUEST_LOGGER_FORMAT', 'nestjs'),
 
     /*
     |--------------------------------------------------------------------------

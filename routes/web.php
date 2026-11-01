@@ -1,18 +1,20 @@
 <?php
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (): JsonResponse {
-    $dbStatus = 'unknown';
+    $dbStatus = Cache::remember('server_db_status', 10, function (): string {
+        try {
+            DB::connection()->getPdo();
 
-    try {
-        DB::connection()->getPdo();
-        $dbStatus = 'connected';
-    } catch (Throwable) {
-        $dbStatus = 'disconnected';
-    }
+            return 'connected';
+        } catch (Throwable) {
+            return 'disconnected';
+        }
+    });
 
     $appName = (string) config('app.name', 'PL Server');
 
@@ -33,7 +35,7 @@ Route::get('/', function (): JsonResponse {
             ],
             'endpoints' => [
                 'health' => url('/up'),
-                'auth' => url(trim((string) env('API_PREFIX', 'api/v1'), '/') . '/auth'),
+                'auth' => url(trim((string) env('API_PREFIX', 'api/v1'), '/').'/auth'),
             ],
         ],
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

@@ -16,7 +16,7 @@ return [
     */
 
     'paths' => [
-        (env('API_PREFIX') ? trim((string) env('API_PREFIX'), '/') . '/*' : 'api/*'),
+        (env('API_PREFIX') ? trim((string) env('API_PREFIX'), '/').'/*' : 'api/*'),
         'api/*',
         'sanctum/csrf-cookie',
     ],

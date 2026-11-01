@@ -24,17 +24,22 @@ class ApiRequestLogger
         $request->attributes->set('_request_start_time', $start);
 
         try {
-            $response = $next($request);
+            return $next($request);
         } catch (Throwable $e) {
             $durationMs = (microtime(true) - $start) * 1000;
             $this->persist($request, null, $durationMs, $e);
             throw $e;
         }
+    }
 
+    /**
+     * Perform any final actions for the request lifecycle after response has been sent to client.
+     */
+    public function terminate(Request $request, Response $response): void
+    {
+        $start = (float) $request->attributes->get('_request_start_time', microtime(true));
         $durationMs = (microtime(true) - $start) * 1000;
         $this->persist($request, $response, $durationMs);
-
-        return $response;
     }
 
     /**
@@ -56,7 +61,7 @@ class ApiRequestLogger
 
         $statusText = $this->getStatusText($statusCode);
         $clientInfo = ClientDetector::detect($request->userAgent());
-        $ip = $request->ip() ?? '127.0.0.1';
+        $ip = $this->resolveClientIp($request);
         $user = $this->resolveUser($request);
         $size = $response ? $this->contentSize($response) : 0;
         $ms = round($durationMs, 2);
@@ -104,6 +109,9 @@ class ApiRequestLogger
             'status_text' => $statusText,
             'duration_ms' => $ms,
             'client' => $clientInfo['display'],
+            'browser' => $clientInfo['browser'],
+            'platform' => $clientInfo['platform'],
+            'device' => $clientInfo['device'],
             'ip' => $ip,
             'user' => $user,
             'size' => $size,
@@ -262,5 +270,99 @@ class ApiRequestLogger
         }
 
         return strlen($content);
+    }
+
+    protected static ?string $cachedLocalIp = null;
+
+    /**
+     * Resolve the requesting client IP address (from proxy headers, remote socket, or client LAN IP).
+     */
+    protected function resolveClientIp(Request $request): string
+    {
+        // 1. Direct proxy headers (Cloudflare, reverse proxies, ngrok, Vite dev proxy, Node proxy)
+        $headers = [
+            'cf-connecting-ip',
+            'x-real-ip',
+            'x-forwarded-for',
+            'true-client-ip',
+            'x-client-ip',
+            'client-ip',
+        ];
+
+        foreach ($headers as $header) {
+            $value = $request->header($header);
+            if (! empty($value)) {
+                $ips = array_map('trim', explode(',', $value));
+                foreach ($ips as $candidate) {
+                    if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+                        if (! $this->isLoopback($candidate)) {
+                            return $candidate;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Standard Laravel request IP (via trusted proxies)
+        $requestIp = $request->ip();
+        if ($requestIp && filter_var($requestIp, FILTER_VALIDATE_IP) && ! $this->isLoopback($requestIp)) {
+            return $requestIp;
+        }
+
+        // 3. Direct server REMOTE_ADDR
+        $remoteAddr = $request->server('REMOTE_ADDR');
+        if ($remoteAddr && filter_var($remoteAddr, FILTER_VALIDATE_IP) && ! $this->isLoopback($remoteAddr)) {
+            return $remoteAddr;
+        }
+
+        // 4. When the request originates from the local machine (loopback 127.0.0.1 / ::1),
+        // resolve the client machine's actual LAN interface IP (e.g. 10.10.13.35 or 192.168.x.x)
+        $localLanIp = $this->getLocalLanIp();
+        if ($localLanIp) {
+            return $localLanIp;
+        }
+
+        return $requestIp ?: ($remoteAddr ?: '127.0.0.1');
+    }
+
+    /**
+     * Determine if an IP is a local loopback address.
+     */
+    protected function isLoopback(string $ip): bool
+    {
+        return $ip === '127.0.0.1' || $ip === '::1' || str_starts_with($ip, '127.');
+    }
+
+    /**
+     * Detect the client machine's primary non-virtual LAN network interface IP.
+     */
+    protected function getLocalLanIp(): ?string
+    {
+        if (self::$cachedLocalIp !== null) {
+            return self::$cachedLocalIp;
+        }
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $output = @shell_exec('ipconfig');
+            if ($output && preg_match_all('/IPv4 Address[ .]*:[ ]*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/i', $output, $matches)) {
+                foreach ($matches[1] as $candidate) {
+                    if (! str_starts_with($candidate, '127.') && ! str_starts_with($candidate, '169.254.') && ! str_starts_with($candidate, '172.')) {
+                        return self::$cachedLocalIp = $candidate;
+                    }
+                }
+                foreach ($matches[1] as $candidate) {
+                    if (! str_starts_with($candidate, '127.') && ! str_starts_with($candidate, '169.254.')) {
+                        return self::$cachedLocalIp = $candidate;
+                    }
+                }
+            }
+        }
+
+        $hostIp = @gethostbyname(gethostname());
+        if ($hostIp && ! str_starts_with($hostIp, '127.')) {
+            return self::$cachedLocalIp = $hostIp;
+        }
+
+        return self::$cachedLocalIp = null;
     }
 }
