@@ -33,7 +33,7 @@ Route::get('/', function (): JsonResponse {
             ],
             'endpoints' => [
                 'health' => url('/up'),
-                'auth' => url('/api/v1/auth'),
+                'auth' => url(trim((string) env('API_PREFIX', 'api/v1'), '/') . '/auth'),
             ],
         ],
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
