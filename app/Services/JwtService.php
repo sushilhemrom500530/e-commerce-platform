@@ -135,4 +135,3 @@ class JwtService
         return is_object($decoded) ? $decoded : null;
     }
 }
-

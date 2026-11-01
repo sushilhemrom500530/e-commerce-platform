@@ -44,14 +44,14 @@ class UserFactory extends Factory
 
     public function admin(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'admin',
         ]);
     }
 
     public function provider(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'provider',
             'service_name' => fake()->company(),
             'service_lisence' => Str::upper(Str::random(10)),
@@ -60,14 +60,14 @@ class UserFactory extends Factory
 
     public function client(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'client',
         ]);
     }
 
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
             'is_verified' => false,
             'status' => 'pending',
@@ -76,14 +76,14 @@ class UserFactory extends Factory
 
     public function suspended(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'suspended',
         ]);
     }
 
     public function deleted(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'deleted',
             'is_deleted' => true,
         ]);

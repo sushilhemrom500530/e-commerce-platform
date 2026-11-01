@@ -48,4 +48,3 @@ class AppException extends Exception
         ], $this->statusCode);
     }
 }
-

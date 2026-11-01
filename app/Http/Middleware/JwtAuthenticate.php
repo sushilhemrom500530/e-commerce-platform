@@ -13,8 +13,7 @@ class JwtAuthenticate
 {
     public function __construct(
         protected JwtService $jwtService
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
@@ -26,14 +25,14 @@ class JwtAuthenticate
         $token = $request->bearerToken()
             ?: ($request->cookie('token') ?: $request->cookies->get('token'));
 
-        if (!$token && $request->hasHeader('cookie')) {
+        if (! $token && $request->hasHeader('cookie')) {
             $rawCookie = (string) $request->header('cookie');
             if (preg_match('/(?:^|;\s*)token=([^;]+)/', $rawCookie, $matches)) {
                 $token = urldecode($matches[1]);
             }
         }
 
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'success' => false,
                 'statusCode' => 401,
@@ -61,7 +60,7 @@ class JwtAuthenticate
         $userRole = $decoded->role ?? null;
 
         // Check authorized roles
-        if (!empty($roles) && !in_array($userRole, $roles, true)) {
+        if (! empty($roles) && ! in_array($userRole, $roles, true)) {
             return response()->json([
                 'success' => false,
                 'statusCode' => 403,
@@ -74,7 +73,7 @@ class JwtAuthenticate
 
         // Attach user resolver so $request->user() works
         $user = $userId ? User::find($userId) : null;
-        $request->setUserResolver(fn() => $user);
+        $request->setUserResolver(fn () => $user);
         $request->attributes->set('jwt_payload', $decoded);
 
         return $next($request);

@@ -18,15 +18,14 @@ class OtpMail extends Mailable
     public function __construct(
         public string $otp,
         public string $purpose = 'Account Verification'
-    ) {
-    }
+    ) {}
 
     /**
      * Get the message envelope.
      */
     public function envelope(): Envelope
     {
-        $brand = config('mail.from.name', 'Waafii');
+        $brand = config('mail.from.name', 'Practice Backend api');
 
         return new Envelope(
             subject: "{$brand} - {$this->purpose} Code: {$this->otp}",

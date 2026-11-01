@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Seed primary admin from environment variables if configured
-        $adminEmail = env('ADMIN_EMAIL_ONE', 'admin@waafii.com');
+        $adminEmail = env('ADMIN_EMAIL_ONE', 'admin@Practice Backend api.com');
         $adminPassword = env('ADMIN_PASSWORD_ONE', 'Admin@123456');
 
         User::firstOrCreate(

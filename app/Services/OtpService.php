@@ -43,7 +43,7 @@ class OtpService
                 'verified' => false,
             ], self::OTP_EXPIRY_SECONDS);
         } catch (Throwable $e) {
-            Log::warning('Redis OTP cache failure: ' . $e->getMessage());
+            Log::warning('Redis OTP cache failure: '.$e->getMessage());
         }
 
         return $otp;
@@ -57,7 +57,7 @@ class OtpService
         try {
             Mail::to($email)->send(new OtpMail($otp, $purpose));
         } catch (Throwable $e) {
-            Log::error('Failed to send OTP email: ' . $e->getMessage());
+            Log::error('Failed to send OTP email: '.$e->getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ class OtpService
 
         $record = EmailOtp::where('email', $normalizedEmail)->latest()->first();
 
-        if (!$record) {
+        if (! $record) {
             throw new AppException(404, 'OTP not found. Please request again.');
         }
 
@@ -116,7 +116,7 @@ class OtpService
 
         $record = EmailOtp::where('email', $normalizedEmail)->latest()->first();
 
-        if (!$record) {
+        if (! $record) {
             throw new AppException(400, 'OTP not found. Please request again.');
         }
 

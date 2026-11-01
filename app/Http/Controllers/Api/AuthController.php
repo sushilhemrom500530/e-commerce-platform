@@ -29,8 +29,7 @@ class AuthController extends Controller
         protected AuthService $authService,
         protected JwtService $jwtService,
         protected GoogleAuthService $googleAuthService
-    ) {
-    }
+    ) {}
 
     /**
      * POST /api/v1/auth/register
@@ -114,7 +113,7 @@ class AuthController extends Controller
             ?: ($authUser?->email
                 ?: ($request->input('userId') ?: $request->input('email')));
 
-        if (!$targetIdentifier) {
+        if (! $targetIdentifier) {
             throw new AppException(
                 401,
                 'User identification required. Please provide a Bearer token or pass email/userId.'
@@ -167,7 +166,7 @@ class AuthController extends Controller
     public function forgotOtpVerify(VerifyOtpRequest $request): JsonResponse
     {
         $token = $request->bearerToken() ?? $request->cookie('token');
-        if (!$token) {
+        if (! $token) {
             throw new AppException(401, 'Token not found');
         }
 
@@ -187,7 +186,7 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
         $token = $request->bearerToken() ?? $request->cookie('token');
-        if (!$token) {
+        if (! $token) {
             throw new AppException(401, 'Token not found');
         }
 
@@ -209,7 +208,7 @@ class AuthController extends Controller
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             throw new AppException(401, 'User not found');
         }
 
@@ -295,7 +294,7 @@ class AuthController extends Controller
         $role = $request->query('role', 'client');
         $validRoles = ['client', 'provider']; // Security fix: 'admin' is prohibited
 
-        if (!in_array($role, $validRoles, true)) {
+        if (! in_array($role, $validRoles, true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid role parameter. Must be provider or client.',
@@ -310,7 +309,7 @@ class AuthController extends Controller
             'mobile' => $request->query('mobile') === 'true',
         ]));
 
-        $url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
+        $url = 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query([
             'client_id' => $clientId,
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
@@ -328,7 +327,7 @@ class AuthController extends Controller
     public function googleCallback(Request $request): RedirectResponse|JsonResponse
     {
         $code = $request->query('code');
-        if (!$code) {
+        if (! $code) {
             return response()->json(['success' => false, 'message' => 'Authentication failed'], 401);
         }
 
@@ -356,7 +355,7 @@ class AuthController extends Controller
             'grant_type' => 'authorization_code',
         ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             return response()->json(['success' => false, 'message' => 'Failed to obtain access token from Google'], 400);
         }
 
@@ -372,20 +371,20 @@ class AuthController extends Controller
             'role' => $role,
         ]);
 
-        $isMobile = !empty($stateDecoded['mobile']);
+        $isMobile = ! empty($stateDecoded['mobile']);
 
         if ($isMobile) {
-            $deepLink = 'waafii://oauth-callback?token=' . urlencode($result['token'])
-                . '&refreshToken=' . urlencode($result['refreshToken'])
-                . '&role=' . urlencode($result['role']);
+            $deepLink = 'Practice Backend api://oauth-callback?token='.urlencode($result['token'])
+                .'&refreshToken='.urlencode($result['refreshToken'])
+                .'&role='.urlencode($result['role']);
 
             return redirect()->away($deepLink);
         }
 
         $clientUrl = env('CLIENT_URL', 'http://localhost:3000');
 
-        return redirect()->away("{$clientUrl}/auth/callback?token=" . urlencode($result['token'])
-            . '&refreshToken=' . urlencode($result['refreshToken']));
+        return redirect()->away("{$clientUrl}/auth/callback?token=".urlencode($result['token'])
+            .'&refreshToken='.urlencode($result['refreshToken']));
     }
 
     /**
@@ -396,7 +395,7 @@ class AuthController extends Controller
         $refreshToken = $request->input('refreshToken')
             ?? ($request->bearerToken() ?? $request->cookie('refreshToken'));
 
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             throw new AppException(401, 'Refresh token is required');
         }
 
@@ -416,7 +415,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             throw new AppException(401, 'Unauthenticated');
         }
 

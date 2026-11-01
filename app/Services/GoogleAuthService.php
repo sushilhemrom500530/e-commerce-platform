@@ -74,4 +74,3 @@ class GoogleAuthService
         throw new AppException(401, 'Invalid or expired Google token. Please try again.');
     }
 }
-

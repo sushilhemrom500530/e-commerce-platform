@@ -7,4 +7,3 @@ return [
     'algo' => 'HS256',
     'issuer' => env('APP_URL', 'http://localhost'),
 ];
-

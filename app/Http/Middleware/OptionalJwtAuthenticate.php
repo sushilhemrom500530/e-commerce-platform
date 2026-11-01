@@ -13,8 +13,7 @@ class OptionalJwtAuthenticate
 {
     public function __construct(
         protected JwtService $jwtService
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
@@ -26,7 +25,7 @@ class OptionalJwtAuthenticate
         $token = $request->bearerToken()
             ?: ($request->cookie('token') ?: $request->cookies->get('token'));
 
-        if (!$token && $request->hasHeader('cookie')) {
+        if (! $token && $request->hasHeader('cookie')) {
             $rawCookie = (string) $request->header('cookie');
             if (preg_match('/(?:^|;\s*)token=([^;]+)/', $rawCookie, $matches)) {
                 $token = urldecode($matches[1]);
@@ -39,7 +38,7 @@ class OptionalJwtAuthenticate
                 $userId = $decoded->id ?? ($decoded->userId ?? null);
                 if ($userId) {
                     $user = User::find($userId);
-                    $request->setUserResolver(fn() => $user);
+                    $request->setUserResolver(fn () => $user);
                 }
                 $request->attributes->set('jwt_payload', $decoded);
             } catch (Throwable) {
