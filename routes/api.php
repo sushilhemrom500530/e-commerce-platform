@@ -38,8 +38,11 @@ Route::prefix('v1')->group(function () {
 
         // Social Authentication
         Route::post('/google', [AuthController::class, 'googleSignIn']);
+
         Route::get('/google', [AuthController::class, 'googleRedirect']);
+
         Route::get('/google/callback', [AuthController::class, 'googleCallback']);
+
         Route::post('/apple', [AuthController::class, 'appleSignIn']);
 
         // Token management & authenticated profile

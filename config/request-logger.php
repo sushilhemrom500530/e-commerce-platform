@@ -61,8 +61,9 @@ return [
     |
     */
     'ignore_paths' => [
-        // 'up',
-        // 'favicon.ico',
+        'favicon.ico',
+        '*.ico',
+        'up',
     ],
 
     /*

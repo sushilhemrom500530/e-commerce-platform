@@ -31,7 +31,7 @@ class ApiRequestLogger
             return;
         }
 
-        $date = date('Y-m-d H:i:s');
+        $date = now()->format('Y-m-d H:i:s');
         $method = strtoupper($request->method());
         $uri = $request->getRequestUri();
         $statusCode = $response->getStatusCode();
@@ -170,49 +170,40 @@ class ApiRequestLogger
     ): string {
         $formattedDuration = sprintf('%.2fms', $durationMs);
         $paddedMethod = str_pad($method, 6, ' ', STR_PAD_BOTH);
+        $userSuffix = $user ? " ({$user})" : '';
 
         if (! $useColors) {
-            $userSuffix = $user ? " ({$user})" : '';
-
             return "{$date}  [{$method}] {$uri}  [{$statusCode} {$statusText}]  ~ {$formattedDuration}  [{$client}]  {$ip}{$userSuffix}";
         }
 
-        $datePart = "\033[90m{$date}\033[0m";
-
-        $methodBadgeStyle = match ($method) {
-            'GET' => "\033[30;46;1m",
-            'POST' => "\033[30;42;1m",
-            'PUT', 'PATCH' => "\033[30;43;1m",
-            'DELETE' => "\033[97;41;1m",
-            default => "\033[97;100;1m",
+        // Action-wise method badge colors
+        $methodStyle = match ($method) {
+            'GET' => 'black;bg=cyan;options=bold',
+            'POST' => 'black;bg=green;options=bold',
+            'PUT', 'PATCH' => 'black;bg=yellow;options=bold',
+            'DELETE' => 'white;bg=red;options=bold',
+            default => 'white;bg=gray;options=bold',
         };
-        $methodPart = "{$methodBadgeStyle} {$paddedMethod} \033[0m";
 
-        $statusBadgeStyle = match (true) {
-            $statusCode >= 200 && $statusCode < 300 => "\033[30;42;1m",
-            $statusCode >= 300 && $statusCode < 400 => "\033[30;46;1m",
-            $statusCode >= 400 && $statusCode < 500 => "\033[30;43;1m",
-            $statusCode >= 500 => "\033[97;41;1m",
-            default => "\033[97;100;1m",
+        // Response-wise status badge colors
+        $statusStyle = match (true) {
+            $statusCode >= 200 && $statusCode < 300 => 'black;bg=green;options=bold',
+            $statusCode >= 300 && $statusCode < 400 => 'black;bg=cyan;options=bold',
+            $statusCode >= 400 && $statusCode < 500 => 'black;bg=yellow;options=bold',
+            $statusCode >= 500 => 'white;bg=red;options=bold',
+            default => 'white;bg=gray;options=bold',
         };
-        $statusPart = "{$statusBadgeStyle} {$statusCode} {$statusText} \033[0m";
 
-        $uriPart = "\033[1;97m{$uri}\033[0m";
-
+        // Duration latency colors
         $durationColor = match (true) {
-            $durationMs < 100 => "\033[1;92m",
-            $durationMs < 500 => "\033[1;93m",
-            default => "\033[1;91m",
+            $durationMs < 100 => 'bright-green;options=bold',
+            $durationMs < 500 => 'bright-yellow;options=bold',
+            default => 'bright-red;options=bold',
         };
-        $durationPart = "{$durationColor}~ {$formattedDuration}\033[0m";
 
-        $clientPart = "\033[1;95m[{$client}]\033[0m";
+        $userPart = $user ? " <fg=bright-blue;options=bold>({$user})</>" : '';
 
-        $ipPart = "\033[90m{$ip}\033[0m";
-
-        $userPart = $user ? " \033[36m({$user})\033[0m" : '';
-
-        return "{$datePart}  {$methodPart} {$uriPart}  {$statusPart}  {$durationPart}  {$clientPart}  {$ipPart}{$userPart}";
+        return "<fg=gray>{$date}</>  <fg={$methodStyle}> {$paddedMethod} </> <fg=bright-white;options=bold>{$uri}</>  <fg={$statusStyle}> {$statusCode} {$statusText} </>  <fg={$durationColor}>~ {$formattedDuration}</>  <fg=bright-magenta;options=bold>[{$client}]</>  <fg=cyan>{$ip}</>{$userPart}";
     }
 
     /**
@@ -274,6 +265,8 @@ class ApiRequestLogger
      */
     protected function stripAnsiColors(string $value): string
     {
-        return (string) preg_replace('/\033\[[0-9;]*m/', '', $value);
+        $clean = strip_tags($value);
+
+        return (string) preg_replace('/\033\[[0-9;]*m/', '', $clean);
     }
 }

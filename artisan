@@ -3,16 +3,42 @@
 
 use Illuminate\Foundation\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 define('LARAVEL_START', microtime(true));
+
+// Enable VT100 ANSI color processing for Windows terminal
+if (function_exists('sapi_windows_vt100_support')) {
+    @sapi_windows_vt100_support(STDOUT, true);
+    @sapi_windows_vt100_support(STDERR, true);
+}
+
+putenv('FORCE_COLOR=1');
+$_SERVER['FORCE_COLOR'] = '1';
+putenv('ANSICON=1');
+$_SERVER['ANSICON'] = '1';
 
 // Register the Composer autoloader...
 require __DIR__.'/vendor/autoload.php';
 
-// Bootstrap Laravel and handle the command...
+// Force ANSI colors for console commands
+if (isset($_SERVER['argv']) && ! in_array('--ansi', $_SERVER['argv'], true) && ! in_array('--no-ansi', $_SERVER['argv'], true)) {
+    $_SERVER['argv'][] = '--ansi';
+}
+
+// Bootstrap Laravel and handle the command with decorated output...
 /** @var Application $app */
 $app = require_once __DIR__.'/bootstrap/app.php';
 
-$status = $app->handleCommand(new ArgvInput);
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$output = new ConsoleOutput;
+$output->setDecorated(true);
+
+$input = new ArgvInput;
+
+$status = $kernel->handle($input, $output);
+
+$kernel->terminate($input, $status);
 
 exit($status);
