@@ -54,6 +54,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Log Line Format
+    |--------------------------------------------------------------------------
+    |
+    | 'badge'  - Modern single-line badge with method, path, status, latency, client.
+    | 'nestjs' - Classic NestJS two-line access + incoming request json line.
+    | 'both'   - Modern decorated badge line + NestJS incoming request json line.
+    |
+    */
+    'format' => env('REQUEST_LOGGER_FORMAT', 'badge'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Paths to Ignore
     |--------------------------------------------------------------------------
     |
@@ -63,7 +75,6 @@ return [
     'ignore_paths' => [
         'favicon.ico',
         '*.ico',
-        'up',
     ],
 
     /*

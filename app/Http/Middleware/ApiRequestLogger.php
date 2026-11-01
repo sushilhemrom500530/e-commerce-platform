@@ -3,10 +3,13 @@
 namespace App\Http\Middleware;
 
 use App\Support\ClientDetector;
+use App\Support\HttpConsoleLog;
 use Closure;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class ApiRequestLogger
 {
@@ -17,15 +20,27 @@ class ApiRequestLogger
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $request->attributes->set('_request_start_time', microtime(true));
+        $start = microtime(true);
+        $request->attributes->set('_request_start_time', $start);
 
-        return $next($request);
+        try {
+            $response = $next($request);
+        } catch (Throwable $e) {
+            $durationMs = (microtime(true) - $start) * 1000;
+            $this->persist($request, null, $durationMs, $e);
+            throw $e;
+        }
+
+        $durationMs = (microtime(true) - $start) * 1000;
+        $this->persist($request, $response, $durationMs);
+
+        return $response;
     }
 
     /**
-     * Handle tasks after the response has been sent to the browser.
+     * Persist request record to HttpConsoleLog and application logs.
      */
-    public function terminate(Request $request, Response $response): void
+    protected function persist(Request $request, ?Response $response, float $durationMs, ?Throwable $exception = null): void
     {
         if ($this->shouldIgnore($request)) {
             return;
@@ -33,46 +48,108 @@ class ApiRequestLogger
 
         $date = now()->format('Y-m-d H:i:s');
         $method = strtoupper($request->method());
-        $uri = $request->getRequestUri();
-        $statusCode = $response->getStatusCode();
+        $path = $request->getRequestUri();
+
+        $statusCode = $exception
+            ? (method_exists($exception, 'getStatusCode') ? (int) $exception->getStatusCode() : 500)
+            : (int) ($response?->getStatusCode() ?? 200);
+
         $statusText = $this->getStatusText($statusCode);
-        $durationMs = $this->calculateDuration($request);
         $clientInfo = ClientDetector::detect($request->userAgent());
         $ip = $request->ip() ?? '127.0.0.1';
         $user = $this->resolveUser($request);
+        $size = $response ? $this->contentSize($response) : 0;
+        $ms = round($durationMs, 2);
 
-        $useColors = (bool) config('request-logger.colors', true);
-
-        $consoleLine = $this->buildConsoleLine(
-            date: $date,
-            method: $method,
-            uri: $uri,
-            statusCode: $statusCode,
-            statusText: $statusText,
-            durationMs: $durationMs,
-            client: $clientInfo['display'],
-            ip: $ip,
-            user: $user,
-            useColors: $useColors
+        $body = $response?->getContent();
+        $bodyStr = is_string($body) ? $body : '';
+        $snip = strlen($bodyStr) > 8000 ? substr($bodyStr, 0, 8000) : $bodyStr;
+        $decoded = $snip !== '' ? json_decode($snip, true) : null;
+        $isHtml = $this->looksLikeHtml($snip);
+        $isLoginPage = $isHtml && (
+            str_contains($snip, 'Sign-in to Dashboard')
+            || str_contains($snip, '/login"')
         );
 
-        $this->writeToConsole($consoleLine);
+        $message = null;
+        $errors = null;
+        $cause = null;
+        $exceptionName = $exception ? class_basename($exception) : null;
+        $stack = null;
+        $sql = null;
 
-        $plainLine = $useColors ? $this->stripAnsiColors($consoleLine) : $consoleLine;
+        if ($exception) {
+            $message = $this->friendlyExceptionMessage($exception);
+            $cause = class_basename($exception);
+            $stack = $message."\n".$this->shortStack($exception);
+            if ($exception instanceof QueryException) {
+                $sql = $exception->getSql();
+            }
+        } elseif (is_array($decoded)) {
+            $message = $decoded['message'] ?? ($decoded['errorMessages'][0]['message'] ?? null);
+            $errors = $decoded['errorMessages'] ?? ($decoded['errors'] ?? null);
+        } elseif ($isLoginPage) {
+            $message = 'Redirected to login page';
+            $cause = 'Unauthenticated redirect to /login';
+        } elseif ($statusCode >= 400) {
+            $message = 'Request failed with status '.$statusCode;
+        }
 
-        $this->writeToLog($plainLine, [
+        $record = [
+            'id' => (string) microtime(true),
             'date' => $date,
             'method' => $method,
-            'uri' => $uri,
-            'status_code' => $statusCode,
-            'duration_ms' => $durationMs,
+            'path' => $path,
+            'status' => $statusCode,
+            'status_text' => $statusText,
+            'duration_ms' => $ms,
             'client' => $clientInfo['display'],
-            'browser' => $clientInfo['browser'],
-            'platform' => $clientInfo['platform'],
-            'device' => $clientInfo['device'],
             'ip' => $ip,
             'user' => $user,
-        ]);
+            'size' => $size,
+            'is_api' => $request->is('api/*'),
+            'is_html' => $isHtml,
+            'is_login_page' => $isLoginPage,
+            'message' => $message,
+            'cause' => $cause,
+            'errors' => $errors,
+            'exception' => $exceptionName,
+            'stack' => $stack,
+            'sql' => $sql,
+        ];
+
+        // 1. Write to the fast bridge for ServeCommand console output
+        HttpConsoleLog::write($record);
+
+        // 2. Also write to Laravel application log
+        if (config('request-logger.log_file', true)) {
+            $logMessage = "{$date} {$method} {$path} {$statusCode} {$statusText} ~ {$ms}ms [{$clientInfo['display']}] {$ip}".($user ? " ({$user})" : '');
+
+            $logContext = [
+                'method' => $method,
+                'uri' => $path,
+                'path' => $path,
+                'status_code' => $statusCode,
+                'status' => $statusCode,
+                'duration_ms' => $ms,
+                'ip' => $ip,
+                'client' => $clientInfo['display'],
+                'browser' => $clientInfo['browser'],
+                'platform' => $clientInfo['platform'],
+                'device' => $clientInfo['device'],
+                'user' => $user,
+            ];
+
+            if ($statusCode >= 400 || $exception) {
+                Log::warning($logMessage, array_filter(array_merge($logContext, [
+                    'message' => $message,
+                    'cause' => $cause,
+                    'sql' => $sql,
+                ])));
+            } else {
+                Log::info($logMessage, $logContext);
+            }
+        }
     }
 
     /**
@@ -84,7 +161,7 @@ class ApiRequestLogger
             return true;
         }
 
-        $ignorePaths = config('request-logger.ignore_paths', []);
+        $ignorePaths = config('request-logger.ignore_paths', ['favicon.ico', '*.ico', 'up']);
 
         foreach ($ignorePaths as $pattern) {
             if ($request->is($pattern)) {
@@ -96,19 +173,7 @@ class ApiRequestLogger
     }
 
     /**
-     * Calculate the request duration in milliseconds.
-     */
-    protected function calculateDuration(Request $request): float
-    {
-        $start = defined('LARAVEL_START')
-            ? LARAVEL_START
-            : (float) $request->attributes->get('_request_start_time', microtime(true));
-
-        return round((microtime(true) - $start) * 1000, 2);
-    }
-
-    /**
-     * Get a short, clean description of the HTTP status code.
+     * Get a short description of the HTTP status code.
      */
     protected function getStatusText(int $statusCode): string
     {
@@ -153,120 +218,49 @@ class ApiRequestLogger
         return null;
     }
 
-    /**
-     * Build the formatted log string for console output.
-     */
-    protected function buildConsoleLine(
-        string $date,
-        string $method,
-        string $uri,
-        int $statusCode,
-        string $statusText,
-        float $durationMs,
-        string $client,
-        string $ip,
-        ?string $user,
-        bool $useColors
-    ): string {
-        $formattedDuration = sprintf('%.2fms', $durationMs);
-        $paddedMethod = str_pad($method, 6, ' ', STR_PAD_BOTH);
-        $userSuffix = $user ? " ({$user})" : '';
-
-        if (! $useColors) {
-            return "{$date}  [{$method}] {$uri}  [{$statusCode} {$statusText}]  ~ {$formattedDuration}  [{$client}]  {$ip}{$userSuffix}";
+    private function friendlyExceptionMessage(Throwable $e): string
+    {
+        if ($e instanceof QueryException) {
+            return $e->getMessage();
         }
 
-        // Action-wise method badge colors
-        $methodStyle = match ($method) {
-            'GET' => 'black;bg=cyan;options=bold',
-            'POST' => 'black;bg=green;options=bold',
-            'PUT', 'PATCH' => 'black;bg=yellow;options=bold',
-            'DELETE' => 'white;bg=red;options=bold',
-            default => 'white;bg=gray;options=bold',
-        };
+        $message = $e->getMessage();
 
-        // Response-wise status badge colors
-        $statusStyle = match (true) {
-            $statusCode >= 200 && $statusCode < 300 => 'black;bg=green;options=bold',
-            $statusCode >= 300 && $statusCode < 400 => 'black;bg=cyan;options=bold',
-            $statusCode >= 400 && $statusCode < 500 => 'black;bg=yellow;options=bold',
-            $statusCode >= 500 => 'white;bg=red;options=bold',
-            default => 'white;bg=gray;options=bold',
-        };
-
-        // Duration latency colors
-        $durationColor = match (true) {
-            $durationMs < 100 => 'bright-green;options=bold',
-            $durationMs < 500 => 'bright-yellow;options=bold',
-            default => 'bright-red;options=bold',
-        };
-
-        $userPart = $user ? " <fg=bright-blue;options=bold>({$user})</>" : '';
-
-        return "<fg=gray>{$date}</>  <fg={$methodStyle}> {$paddedMethod} </> <fg=bright-white;options=bold>{$uri}</>  <fg={$statusStyle}> {$statusCode} {$statusText} </>  <fg={$durationColor}>~ {$formattedDuration}</>  <fg=bright-magenta;options=bold>[{$client}]</>  <fg=cyan>{$ip}</>{$userPart}";
+        return $message !== '' ? $message : 'Unhandled exception';
     }
 
-    /**
-     * Write the formatted line to standard output for console display.
-     */
-    protected function writeToConsole(string $line): void
+    private function shortStack(Throwable $e): string
     {
-        if (app()->runningUnitTests() || ! config('request-logger.console', true)) {
-            return;
-        }
+        $lines = explode("\n", $e->getTraceAsString());
+        $appLines = array_values(array_filter($lines, static function (string $line): bool {
+            return str_contains($line, DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR)
+                || str_contains($line, '/app/');
+        }));
 
-        try {
-            if (defined('STDOUT') && is_resource(STDOUT)) {
-                fwrite(STDOUT, $line.PHP_EOL);
+        $picked = $appLines !== [] ? array_slice($appLines, 0, 8) : array_slice($lines, 0, 5);
 
-                return;
-            }
-
-            $stdout = @fopen('php://stdout', 'w');
-            if ($stdout !== false) {
-                fwrite($stdout, $line.PHP_EOL);
-                fclose($stdout);
-
-                return;
-            }
-
-            @file_put_contents('php://stdout', $line.PHP_EOL);
-        } catch (\Throwable) {
-            // Keep request flow intact even if console output stream is unavailable
-        }
+        return implode("\n", $picked);
     }
 
-    /**
-     * Write the log entry to Laravel's logging subsystem.
-     *
-     * @param  array<string, mixed>  $context
-     */
-    protected function writeToLog(string $message, array $context): void
+    private function looksLikeHtml(string $body): bool
     {
-        if (! config('request-logger.log_file', true)) {
-            return;
-        }
+        $trim = ltrim($body);
 
-        $channel = config('request-logger.channel');
-
-        try {
-            if ($channel) {
-                Log::channel($channel)->info($message, $context);
-            } else {
-                Log::info($message, $context);
-            }
-        } catch (\Throwable) {
-            // Log exceptions should never disrupt request delivery
-        }
+        return $trim !== '' && (
+            str_starts_with($trim, '<!DOCTYPE')
+            || str_starts_with($trim, '<html')
+            || str_starts_with($trim, '<HTML')
+        );
     }
 
-    /**
-     * Strip ANSI color escape sequences from a string.
-     */
-    protected function stripAnsiColors(string $value): string
+    private function contentSize(Response $response): int
     {
-        $clean = strip_tags($value);
+        $content = $response->getContent();
 
-        return (string) preg_replace('/\033\[[0-9;]*m/', '', $clean);
+        if ($content === false || $content === null) {
+            return 0;
+        }
+
+        return strlen($content);
     }
 }
