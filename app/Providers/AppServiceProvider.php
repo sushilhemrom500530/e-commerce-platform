@@ -24,32 +24,92 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Global API rate limiting (matching Express 200 req/min)
+        // Global API baseline rate limiting (matching Express 200 req/min)
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(200)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Dedicated distributed rate limiters for authentication endpoints
+        // Dedicated production-grade rate limiters for authentication endpoints
+
+        // 1. Login rate limiter (5 attempts per minute per normalized email & IP, plus 20 attempts/min per IP)
         RateLimiter::for('auth.login', function (Request $request) {
-            $key = ($request->input('email') ?: 'guest').'|'.$request->ip();
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
 
             return Limit::perMinute(5)->by($key);
         });
 
+        // 2. Registration rate limiter (10 attempts per minute per IP to prevent spam bot account creation)
         RateLimiter::for('auth.register', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });
 
+        // 3. OTP verification rate limiter (5 attempts per minute to prevent 6-digit OTP brute-forcing)
         RateLimiter::for('auth.otp', function (Request $request) {
-            $key = ($request->input('email') ?: 'guest').'|'.$request->ip();
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
+        RateLimiter::for('auth.otp.verify', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
 
             return Limit::perMinute(5)->by($key);
         });
 
+        // 4. OTP sending / resend rate limiter (3 requests per 10 minutes to protect SMTP/SMS quota)
         RateLimiter::for('auth.resend', function (Request $request) {
-            $key = ($request->input('email') ?: 'guest').'|'.$request->ip();
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
 
             return Limit::perMinutes(10, 3)->by($key);
+        });
+        RateLimiter::for('auth.otp.send', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinutes(10, 3)->by($key);
+        });
+
+        // 5. Password reset submission (5 attempts per minute per email & IP)
+        RateLimiter::for('auth.password.reset', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', 'guest')));
+            $key = ($email !== '' ? $email : 'guest') . '|' . $request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
+
+        // 6. Authenticated password change (5 attempts per minute per user & IP)
+        RateLimiter::for('auth.password.change', function (Request $request) {
+            $user = $request->user();
+            $identifier = $user?->id ?? ($user?->email ?? ($request->input('email') ?: 'guest'));
+            $key = strtolower(trim((string) $identifier)) . '|' . $request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
+
+        // 7. Social authentication (10 attempts per minute per IP)
+        RateLimiter::for('auth.social', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        // 8. Refresh token rotation (15 attempts per minute per token hash & IP)
+        RateLimiter::for('auth.refresh', function (Request $request) {
+            $token = $request->input('refreshToken') ?: ($request->bearerToken() ?: 'guest');
+            $tokenHash = substr(hash('sha256', (string) $token), 0, 16);
+            $key = $tokenHash . '|' . $request->ip();
+
+            return Limit::perMinute(15)->by($key);
+        });
+
+        // 9. Role selection (10 attempts per minute per user & IP)
+        RateLimiter::for('auth.role', function (Request $request) {
+            $user = $request->user();
+            $identifier = $user?->id ?? ($request->input('email') ?: 'guest');
+            $key = strtolower(trim((string) $identifier)) . '|' . $request->ip();
+
+            return Limit::perMinute(10)->by($key);
         });
     }
 }
