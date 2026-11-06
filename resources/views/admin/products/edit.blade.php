@@ -132,35 +132,64 @@
         const categorySelect = document.getElementById('category_id');
         const subcategorySelect = document.getElementById('subcategory_id');
 
-        async function loadSubcategories(categoryId, selectedId = null) {
+        const categoryMap = @json($categories->mapWithKeys(fn ($cat) => [
+            $cat->id => $cat->subcategories->map(fn ($sub) => ['id' => $sub->id, 'name' => $sub->name])
+        ]));
+
+        function renderSubcategories(categoryId, selectedId = null) {
+            subcategorySelect.innerHTML = '';
+
             if (!categoryId) {
-                subcategorySelect.innerHTML = '<option value="">Select Category First</option>';
-                subcategorySelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Select Category First';
+                subcategorySelect.appendChild(opt);
                 return;
             }
 
-            try {
-                const response = await fetch(`/admin/categories/${categoryId}/subcategories`);
-                const subcategories = await response.json();
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select Subcategory';
+            subcategorySelect.appendChild(placeholder);
 
-                subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-                subcategories.forEach(sub => {
+            const subs = categoryMap[categoryId] || [];
+            if (subs.length > 0) {
+                subs.forEach(sub => {
                     const option = document.createElement('option');
                     option.value = sub.id;
                     option.textContent = sub.name;
-                    if (selectedId && sub.id == selectedId) {
+                    if (selectedId && String(sub.id) === String(selectedId)) {
                         option.selected = true;
                     }
                     subcategorySelect.appendChild(option);
                 });
-                subcategorySelect.disabled = false;
-            } catch (error) {
-                console.error(error);
+            } else {
+                fetch(`/admin/categories/${categoryId}/subcategories`)
+                    .then(response => response.json())
+                    .then(subcategories => {
+                        if (subcategories && subcategories.length > 0) {
+                            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+                            subcategories.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub.id;
+                                option.textContent = sub.name;
+                                if (selectedId && String(sub.id) === String(selectedId)) {
+                                    option.selected = true;
+                                }
+                                subcategorySelect.appendChild(option);
+                            });
+                        } else {
+                            placeholder.textContent = 'No subcategories available';
+                        }
+                    })
+                    .catch(() => {
+                        placeholder.textContent = 'No subcategories available';
+                    });
             }
         }
 
         categorySelect.addEventListener('change', function() {
-            loadSubcategories(this.value);
+            renderSubcategories(this.value);
         });
 
         const imageInput = document.getElementById('image_input');

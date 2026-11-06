@@ -39,7 +39,10 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $categories = Category::where('is_active', true)
+            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
 
         return view('admin.products.create', compact('categories'));
     }
@@ -79,7 +82,10 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $categories = Category::where('is_active', true)
+            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
         $subcategories = Subcategory::where('category_id', $product->category_id)->where('is_active', true)->orderBy('name')->get();
 
         return view('admin.products.edit', compact('product', 'categories', 'subcategories'));

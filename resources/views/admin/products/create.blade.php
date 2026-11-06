@@ -33,8 +33,20 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                     Subcategory * <span class="text-[10px] text-indigo-600 lowercase font-normal">(updates dynamically)</span>
                 </label>
-                <select id="subcategory_id" name="subcategory_id" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none @error('subcategory_id') border-rose-500 @enderror" required disabled>
-                    <option value="">Select Category First</option>
+                <select id="subcategory_id" name="subcategory_id" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none @error('subcategory_id') border-rose-500 @enderror" required>
+                    <option value="">Select Subcategory</option>
+                    @if(old('category_id'))
+                        @php
+                            $selectedCategory = $categories->firstWhere('id', old('category_id'));
+                        @endphp
+                        @if($selectedCategory)
+                            @foreach($selectedCategory->subcategories as $sub)
+                                <option value="{{ $sub->id }}" {{ old('subcategory_id') == $sub->id ? 'selected' : '' }}>
+                                    {{ $sub->name }}
+                                </option>
+                            @endforeach
+                        @endif
+                    @endif
                 </select>
                 @error('subcategory_id')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
             </div>
@@ -123,42 +135,68 @@
         const subcategorySelect = document.getElementById('subcategory_id');
         const oldSubcategoryId = "{{ old('subcategory_id') }}";
 
-        async function loadSubcategories(categoryId, selectedId = null) {
+        const categoryMap = @json($categories->mapWithKeys(fn ($cat) => [
+            $cat->id => $cat->subcategories->map(fn ($sub) => ['id' => $sub->id, 'name' => $sub->name])
+        ]));
+
+        function renderSubcategories(categoryId, selectedId = null) {
+            subcategorySelect.innerHTML = '';
+
             if (!categoryId) {
-                subcategorySelect.innerHTML = '<option value="">Select Category First</option>';
-                subcategorySelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Select Category First';
+                subcategorySelect.appendChild(opt);
                 return;
             }
 
-            subcategorySelect.innerHTML = '<option value="">Loading subcategories...</option>';
-            subcategorySelect.disabled = true;
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select Subcategory';
+            subcategorySelect.appendChild(placeholder);
 
-            try {
-                const response = await fetch(`/admin/categories/${categoryId}/subcategories`);
-                const subcategories = await response.json();
-
-                subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-                subcategories.forEach(sub => {
+            const subs = categoryMap[categoryId] || [];
+            if (subs.length > 0) {
+                subs.forEach(sub => {
                     const option = document.createElement('option');
                     option.value = sub.id;
                     option.textContent = sub.name;
-                    if (selectedId && sub.id == selectedId) {
+                    if (selectedId && String(sub.id) === String(selectedId)) {
                         option.selected = true;
                     }
                     subcategorySelect.appendChild(option);
                 });
-                subcategorySelect.disabled = false;
-            } catch (error) {
-                subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+            } else {
+                fetch(`/admin/categories/${categoryId}/subcategories`)
+                    .then(response => response.json())
+                    .then(subcategories => {
+                        if (subcategories && subcategories.length > 0) {
+                            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+                            subcategories.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub.id;
+                                option.textContent = sub.name;
+                                if (selectedId && String(sub.id) === String(selectedId)) {
+                                    option.selected = true;
+                                }
+                                subcategorySelect.appendChild(option);
+                            });
+                        } else {
+                            placeholder.textContent = 'No subcategories available';
+                        }
+                    })
+                    .catch(() => {
+                        placeholder.textContent = 'No subcategories available';
+                    });
             }
         }
 
         categorySelect.addEventListener('change', function() {
-            loadSubcategories(this.value);
+            renderSubcategories(this.value);
         });
 
-        if (categorySelect.value) {
-            loadSubcategories(categorySelect.value, oldSubcategoryId);
+        if (categorySelect.value && subcategorySelect.options.length <= 1) {
+            renderSubcategories(categorySelect.value, oldSubcategoryId);
         }
 
         // Image Preview

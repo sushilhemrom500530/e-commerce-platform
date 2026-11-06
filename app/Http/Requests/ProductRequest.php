@@ -38,7 +38,12 @@ class ProductRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'category_id.required' => 'Please select a category.',
+            'subcategory_id.required' => 'Please select a subcategory for this product.',
             'subcategory_id.exists' => 'The selected subcategory does not belong to the selected category.',
+            'name.required' => 'Product name is required.',
+            'new_price.required' => 'Selling price is required.',
+            'image.required' => 'Please upload a product thumbnail image.',
         ];
     }
 }
