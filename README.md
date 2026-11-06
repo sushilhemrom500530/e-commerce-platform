@@ -1,58 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# E-Commerce Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A production-grade, simplified E-Commerce Platform built with **Laravel 11/12/13, PostgreSQL, Tailwind CSS, and PHPUnit**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Category Management (Full CRUD)
+* Create, read, edit, and delete product categories.
+* Form validation ensuring required, unique category names and image format.
+* Auto-generated SEO-friendly slugs.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Subcategory Management (Full CRUD)
+* Create and manage subcategories under parent categories.
+* Eloquent relationships (`Category hasMany Subcategories`, `Subcategory belongsTo Category`).
+* Real-time AJAX endpoint (`/admin/categories/{category}/subcategories`) for dynamic dropdowns.
 
-## Learning Laravel
+### 3. Product Management (Full CRUD)
+* Add products with Category, Subcategory, Product Name, Description, Image Upload, Old Price, and New Price.
+* **Dynamic Dependent Dropdown:** Selecting a category instantly updates the subcategory dropdown via AJAX.
+* **Cross-Validation:** Backend rule prevents selecting a subcategory that does not belong to the selected category.
+* Automatic image handling with disk cleanup on update/delete.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Customer Storefront
+* **Product Catalog (`/`):** All products organized and grouped by their respective **Subcategories**.
+* **Product Details Page (`/product/{slug}`):** Accessible via SEO-friendly slug URLs with price comparisons (`Old: ৳120,000`, `New: ৳110,000`, `Save: 8%`), high-res images, and related products.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 5. Standardized API Architecture
+* Centralized `ApiResponse` trait (`statusCode`, `success`, `message`, `results`, and optional `meta` pagination).
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## Technology Stack
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+* **Framework:** Laravel 11/12/13 (PHP 8.3)
+* **Database:** PostgreSQL (with Eloquent ORM & cascade deletions)
+* **Styling:** Tailwind CSS
+* **Testing:** PHPUnit (80 tests, 270 assertions, 100% passing)
 
+---
+
+## Installation & Setup
+
+### 1. Clone & Install Dependencies
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/sushilhemrom500530/e-commerce-platform.git
+cd e-commerce-platform
+composer install
+npm install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Environment Configuration
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+Configure your PostgreSQL connection in `.env`:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=e_commerce
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+```
 
-## Contributing
+### 3. Run Migrations & Seeders
+```bash
+php artisan migrate:fresh --seed
+php artisan storage:link
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Start the Application
+```bash
+php artisan serve --port=8001
+```
+Open **`http://127.0.0.1:8001`** in your browser.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Application Routes
 
-## Security Vulnerabilities
+| Method | URI | Description |
+|---|---|---|
+| `GET` | `/` | Storefront Product Catalog (Grouped by Subcategories) |
+| `GET` | `/product/{slug}` | SEO-Friendly Product Details Page |
+| `GET` | `/health` | Centralized JSON Server Status Health Route |
+| `GET` | `/admin/products` | Products Management Table |
+| `GET` | `/admin/products/create` | Add Product with Dynamic Dependent Dropdowns |
+| `GET` | `/admin/categories` | Categories Management Table |
+| `GET` | `/admin/subcategories` | Subcategories Management Table |
+| `GET` | `/admin/categories/{category}/subcategories` | AJAX Dynamic Subcategories Endpoint |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Running Automated Tests
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Run the full PHPUnit test suite:
+```bash
+php artisan test
+```
+All 80 tests pass covering Unit, Feature, Authentication, Relationships, CRUD, and Storefront scenarios.

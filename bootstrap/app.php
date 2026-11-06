@@ -37,6 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (ValidationException $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             $errorMessages = [];
             foreach ($e->errors() as $field => $messages) {
                 foreach ($messages as $message) {
@@ -51,18 +55,30 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             return ApiResponse::formatError('Access denied. No token provided.', 401, [
                 ['path' => '', 'message' => $e->getMessage() ?: 'Access denied. No token provided.'],
             ]);
         });
 
         $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             return ApiResponse::formatError('You are not authorized', 403, [
                 ['path' => '', 'message' => $e->getMessage() ?: 'You are not authorized'],
             ]);
         });
 
         $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             $response = ApiResponse::formatError('Too many requests from this IP, please try again later', 429, [
                 ['path' => '', 'message' => 'Too many requests. Please try again later.'],
             ]);
@@ -74,6 +90,10 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             return ApiResponse::formatError('Resource not found', 404, [
                 ['path' => '', 'message' => $e->getMessage() ?: 'Resource not found'],
             ]);
