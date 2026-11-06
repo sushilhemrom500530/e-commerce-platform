@@ -2,41 +2,32 @@
 
 @section('content')
 <div class="space-y-12">
-    <!-- Hero Banner (ShopEase Style from Reference Image) -->
-    <div class="relative rounded-[2.5rem] bg-gradient-to-r from-purple-100 via-indigo-50 to-purple-200 p-8 sm:p-14 overflow-hidden border border-purple-100/60 shadow-xs">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-            <!-- Left Headline & Call to Action -->
-            <div class="lg:col-span-7 space-y-6">
-                <h1 class="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                    Smart Shopping<br>
-                    <span class="text-indigo-950">Better Living</span>
-                </h1>
-                <p class="text-slate-600 text-sm sm:text-base font-medium max-w-md leading-relaxed">
-                    Discover amazing products with best prices and fast delivery.
-                </p>
-                <div>
-                    <a href="#products-catalog" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition hover:scale-105 duration-200">
-                        <span>Shop Now</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right Earbuds 3D Graphic (Reference Image Match) -->
-            <div class="lg:col-span-5 flex justify-center lg:justify-end">
-                <div class="relative w-64 sm:w-80 aspect-square flex items-center justify-center">
-                    <!-- Soft Glow Background -->
-                    <div class="absolute inset-0 bg-white/40 rounded-full blur-2xl"></div>
-                    <img src="https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800&auto=format&fit=crop&q=80" 
-                         alt="Wireless Earbuds in Charging Case" 
-                         class="relative z-10 w-full h-full object-contain drop-shadow-2xl rounded-3xl transform hover:scale-105 transition duration-500">
-                </div>
-            </div>
+    <!-- Hero Banner (ShopEase Style matching Reference Image) -->
+    <div class="relative rounded-[2rem] overflow-hidden shadow-xs bg-[#DCD8F7] border border-purple-100/50 min-h-[380px] sm:min-h-[440px] flex items-center">
+        <!-- Background Layer with 3D Earbuds and Purple Waves -->
+        <div class="absolute inset-0 bg-cover bg-no-repeat bg-right lg:bg-center pointer-events-none"
+             style="background-image: url('{{ asset('images/hero-earbuds.jpg') }}');">
         </div>
 
-        <!-- Decorative Background Wave Elements -->
-        <div class="absolute -right-16 -top-16 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-16 -bottom-16 w-80 h-80 bg-indigo-300/20 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- Left Gradient Overlay for Perfect Contrast -->
+        <div class="absolute inset-y-0 left-0 w-full lg:w-3/5 bg-gradient-to-r from-[#D8D2FB] via-[#D8D2FB]/90 to-transparent pointer-events-none"></div>
+
+        <!-- Content Overlay -->
+        <div class="relative z-10 py-12 sm:py-20 px-8 sm:px-14 max-w-xl space-y-6">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-[#17123F] tracking-tight leading-[1.08]">
+                Smart Shopping<br>
+                <span>Better Living</span>
+            </h1>
+            <p class="text-[#494274] text-sm sm:text-base font-medium max-w-md leading-relaxed">
+                Discover amazing products with<br class="hidden sm:inline"> best prices and fast delivery.
+            </p>
+            <div class="pt-2">
+                <a href="#products-catalog" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#5946F5] hover:bg-[#4C38E6] text-white font-bold text-sm shadow-md shadow-indigo-300/50 transition hover:scale-105 duration-200">
+                    <span>Shop Now</span>
+                    <span class="text-base font-bold">→</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Trust Badges Strip (Reference Image Match) -->
