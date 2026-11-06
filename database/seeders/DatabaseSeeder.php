@@ -16,15 +16,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Seed primary admin from environment variables if configured
-        $adminEmail = env('ADMIN_EMAIL_ONE', 'admin@Practice Backend api.com');
-        $adminPassword = env('ADMIN_PASSWORD_ONE', 'Admin@123456');
-
-        User::firstOrCreate(
-            ['email' => strtolower(trim($adminEmail))],
+        // 1. Primary Admin Account (Matches login page 1-click demo button)
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make($adminPassword),
+                'password' => Hash::make('Admin@123456'),
                 'role' => 'admin',
                 'status' => 'active',
                 'is_verified' => true,
@@ -33,25 +30,49 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Secondary admin if provided
-        $adminEmailTwo = env('ADMIN_EMAIL_TWO');
-        $adminPasswordTwo = env('ADMIN_PASSWORD_TWO');
-        if ($adminEmailTwo && $adminPasswordTwo) {
-            User::firstOrCreate(
-                ['email' => strtolower(trim($adminEmailTwo))],
-                [
-                    'name' => 'Secondary Administrator',
-                    'password' => Hash::make($adminPasswordTwo),
-                    'role' => 'admin',
-                    'status' => 'active',
-                    'is_verified' => true,
-                    'is_deleted' => false,
-                    'is_profile_completed' => true,
-                ]
-            );
-        }
+        // 2. Alternative Easy Admin Account
+        User::updateOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'status' => 'active',
+                'is_verified' => true,
+                'is_deleted' => false,
+                'is_profile_completed' => true,
+            ]
+        );
 
-        // 3. Seed E-Commerce Catalog (Categories, Subcategories, Products)
+        // 3. Customer Account (Matches login page 1-click demo button)
+        User::updateOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'name' => 'John Customer',
+                'password' => Hash::make('Customer@123456'),
+                'role' => 'client',
+                'status' => 'active',
+                'is_verified' => true,
+                'is_deleted' => false,
+                'is_profile_completed' => true,
+            ]
+        );
+
+        // 4. Alternative Easy User Account
+        User::updateOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'name' => 'Demo User',
+                'password' => Hash::make('password'),
+                'role' => 'client',
+                'status' => 'active',
+                'is_verified' => true,
+                'is_deleted' => false,
+                'is_profile_completed' => true,
+            ]
+        );
+
+        // 5. Seed E-Commerce Catalog (Categories, Subcategories, Products)
         $this->call(EcommerceCatalogSeeder::class);
     }
 }
