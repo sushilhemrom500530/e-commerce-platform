@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\SubcategoryController;
@@ -77,7 +78,8 @@ Route::get('/health', function (): JsonResponse {
 
 // Admin Management Portal
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/', '/admin/products')->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('subcategories', SubcategoryController::class)->except(['show']);

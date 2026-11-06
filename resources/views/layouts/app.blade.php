@@ -41,71 +41,8 @@
     </style>
 </head>
 <body class="flex flex-col min-h-screen text-slate-800 antialiased bg-white">
-    @if(request()->routeIs('admin.*'))
-        <!-- Admin Management Portal Header -->
-        <header class="sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-md">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center gap-6">
-                        <a href="{{ route('admin.products.index') }}" class="flex items-center gap-2.5 font-extrabold text-lg tracking-tight">
-                            <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow">SE</span>
-                            <span>Shop<span class="text-indigo-400">Ease</span></span>
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Admin Panel</span>
-                        </a>
-
-                        <nav class="hidden md:flex items-center gap-1 text-sm font-semibold">
-                            <a href="{{ route('admin.products.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('admin.products.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">Products</a>
-                            <a href="{{ route('admin.categories.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">Categories</a>
-                            <a href="{{ route('admin.subcategories.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('admin.subcategories.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">Subcategories</a>
-                        </nav>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('admin.products.create') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition shadow-sm">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>Add Product</span>
-                        </a>
-
-                        <a href="{{ route('storefront.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs font-semibold transition border border-slate-700">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>View Storefront</span>
-                        </a>
-
-                        @auth
-                            <div class="relative group">
-                                <button type="button" class="flex items-center p-0.5 rounded-full ring-2 ring-indigo-400/30 hover:ring-indigo-400 transition cursor-pointer" aria-label="Admin user menu">
-                                    @if(auth()->user()->profile_url)
-                                        <img src="{{ auth()->user()->profile_url }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover">
-                                    @else
-                                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
-                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                        </div>
-                                    @endif
-                                </button>
-                                <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block hover:block z-50">
-                                    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-2 text-slate-800">
-                                        <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                            <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                                            <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
-                                        </div>
-                                        <a href="{{ route('profile') }}" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition">Profile</a>
-                                        <form method="POST" action="{{ route('logout') }}" class="pt-1 border-t border-slate-100">
-                                            @csrf
-                                            <button type="submit" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer">Logout</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition">Login</a>
-                        @endauth
-                    </div>
-                </div>
-            </div>
-        </header>
-    @else
-        <!-- ShopEase Storefront Full-Width Header with Smart Scroll Animation -->
-        <header id="storefront-navbar" class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-slate-100 shadow-xs transition-transform duration-300 ease-in-out">
+    <!-- ShopEase Storefront Full-Width Header with Smart Scroll Animation -->
+    <header id="storefront-navbar" class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-slate-100 shadow-xs transition-transform duration-300 ease-in-out">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16 sm:h-20">
                     <!-- Brand Logo -->
@@ -236,7 +173,6 @@
                 </div>
             </div>
         </header>
-    @endif
 
     <!-- Flash Alerts -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
