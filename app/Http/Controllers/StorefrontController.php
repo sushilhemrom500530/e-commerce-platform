@@ -66,6 +66,7 @@ class StorefrontController extends Controller
     public function products(Request $request): View|JsonResponse
     {
         $categories = Category::where('is_active', true)
+            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
             ->withCount('products')
             ->orderBy('name')
             ->get();
@@ -78,11 +79,27 @@ class StorefrontController extends Controller
                 : Category::where('slug', $catParam)->first();
         }
 
+        $selectedSubcategory = null;
+        if ($request->filled('subcategory')) {
+            $subParam = (string) $request->query('subcategory');
+            $selectedSubcategory = is_numeric($subParam)
+                ? Subcategory::where('id', (int) $subParam)->first()
+                : Subcategory::where('slug', $subParam)->first();
+
+            if ($selectedSubcategory && ! $selectedCategory) {
+                $selectedCategory = $selectedSubcategory->category;
+            }
+        }
+
         $query = Product::with(['category', 'subcategory'])
             ->where('is_active', true);
 
         if ($selectedCategory) {
             $query->where('category_id', $selectedCategory->id);
+        }
+
+        if ($selectedSubcategory) {
+            $query->where('subcategory_id', $selectedSubcategory->id);
         }
 
         if ($request->filled('search')) {
@@ -109,10 +126,11 @@ class StorefrontController extends Controller
                 'products' => $products,
                 'categories' => $categories,
                 'selected_category' => $selectedCategory,
+                'selected_subcategory' => $selectedSubcategory,
             ], 'Products catalog retrieved successfully.');
         }
 
-        return view('storefront.products', compact('products', 'categories', 'selectedCategory', 'sort'));
+        return view('storefront.products', compact('products', 'categories', 'selectedCategory', 'selectedSubcategory', 'sort'));
     }
 
     /**
