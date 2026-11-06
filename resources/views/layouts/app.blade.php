@@ -170,65 +170,94 @@
                             </div>
                         @endauth
 
-                        <!-- Mobile Hamburger Menu Button (visible on small devices) -->
+                        <!-- Mobile Hamburger Menu Button (opens drawer) -->
                         <button type="button" 
                                 id="mobile-menu-btn" 
-                                onclick="toggleMobileMenu()" 
+                                onclick="openMobileDrawer()" 
                                 class="md:hidden p-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-100 transition focus:outline-none cursor-pointer"
-                                aria-label="Toggle mobile menu"
+                                aria-label="Open mobile menu"
                                 aria-expanded="false">
-                            <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                            <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                     </div>
                 </div>
             </div>
+        </header>
 
-            <!-- Mobile Navigation Menu Dropdown Panel (Displays all nav items on small devices) -->
-            <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 bg-white/98 backdrop-blur-md px-4 sm:px-6 pt-3 pb-6 shadow-xl transition-all duration-300">
-                <!-- Mobile Search (< sm) -->
-                <div class="sm:hidden mb-4 pt-1">
-                    <form action="{{ route('storefront.products') }}" method="GET" class="relative">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." 
-                               class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-100 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </span>
-                    </form>
-                </div>
+    <!-- Mobile Slide-over Drawer with Backdrop Overlay -->
+    <div id="mobile-drawer-container" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop Overlay -->
+        <div id="mobile-drawer-backdrop" 
+             onclick="closeMobileDrawer()" 
+             class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs opacity-0 transition-opacity duration-300 ease-out cursor-pointer">
+        </div>
 
-                <!-- Nav Menu Items (Home, Shop, Categories, About, Contact) -->
+        <!-- Slide-over Drawer Panel -->
+        <div id="mobile-drawer-panel" 
+             class="fixed inset-y-0 right-0 z-10 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out">
+            
+            <!-- Drawer Header: Brand Logo & Close (X) Button -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <a href="{{ route('storefront.index') }}" class="flex items-center gap-2.5 text-slate-900 font-extrabold text-xl tracking-tight">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 7a4 4 0 00-8 0v1H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-9a2 2 0 00-2-2h-3V7zm-6 1V7a2 2 0 114 0v1h-4zm-1 6a1 1 0 112 0 3 3 0 006 0 1 1 0 112 0 5 5 0 01-10 0z"/>
+                        </svg>
+                    </span>
+                    <span class="font-black text-slate-900 text-lg tracking-tight">Shop<span class="text-indigo-600">Ease</span></span>
+                </a>
+
+                <button type="button" 
+                        onclick="closeMobileDrawer()" 
+                        class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
+                        aria-label="Close menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Drawer Scrollable Body: Search & Navigation Items -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-5">
+                <!-- Search Box -->
+                <form action="{{ route('storefront.products') }}" method="GET" class="relative">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." 
+                           class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-100 text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
+                </form>
+
+                <!-- Navigation Links (Home, Shop, Categories, About, Contact) -->
                 <nav class="space-y-1 text-sm font-semibold text-slate-700">
                     <!-- Home -->
                     <a href="{{ route('storefront.index') }}" 
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('storefront.index') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
+                       class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.index') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Home</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
                     </a>
 
                     <!-- Shop -->
                     <a href="{{ route('storefront.products') }}" 
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('storefront.products') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
+                       class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.products') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Shop</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
                     </a>
 
-                    <!-- Categories (With Expandable Sub-items) -->
+                    <!-- Categories (Collapsible with Sub-items) -->
                     <div>
                         <button type="button" 
                                 onclick="toggleMobileCategories()" 
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition hover:bg-slate-50 hover:text-indigo-600 cursor-pointer {{ request('category') ? 'text-indigo-600 font-bold' : '' }}">
+                                class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-left transition hover:bg-slate-50 hover:text-indigo-600 cursor-pointer {{ request('category') ? 'text-indigo-600 font-bold' : '' }}">
                             <span>Categories</span>
                             <svg id="mobile-categories-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
                         <div id="mobile-categories-dropdown" class="hidden pl-4 pr-2 py-1 space-y-1 border-l-2 border-indigo-100 ml-4 my-1">
-                            <a href="{{ route('storefront.products') }}" class="block px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50">
+                            <a href="{{ route('storefront.products') }}" class="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50">
                                 All Categories
                             </a>
                             @php
@@ -236,7 +265,7 @@
                             @endphp
                             @foreach($mobileNavCategories as $mCat)
                                 <a href="{{ route('storefront.products', ['category' => $mCat->slug]) }}" 
-                                   class="block px-3 py-1.5 rounded-lg text-xs font-semibold {{ request('category') === $mCat->slug ? 'text-indigo-600 font-bold bg-indigo-50' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
+                                   class="block px-3 py-2 rounded-lg text-xs font-semibold {{ request('category') === $mCat->slug ? 'text-indigo-600 font-bold bg-indigo-50' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
                                     {{ $mCat->name }}
                                 </a>
                             @endforeach
@@ -245,20 +274,76 @@
 
                     <!-- About -->
                     <a href="{{ route('storefront.about') }}" 
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('storefront.about') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
+                       class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.about') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>About</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
                     </a>
 
                     <!-- Contact -->
                     <a href="{{ route('storefront.contact') }}" 
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('storefront.contact') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
+                       class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.contact') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Contact</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
                     </a>
                 </nav>
             </div>
-        </header>
+
+            <!-- Drawer Footer: Auth / User Details -->
+            <div class="p-5 border-t border-slate-100 bg-slate-50/70">
+                @guest
+                    <div class="space-y-2">
+                        <a href="{{ route('login') }}" 
+                           class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                            <span>Login to Account</span>
+                        </a>
+                        <a href="{{ route('register') }}" 
+                           class="w-full flex items-center justify-center py-2 px-4 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-white transition">
+                            <span>Register New Account</span>
+                        </a>
+                    </div>
+                @endguest
+
+                @auth
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            @if(auth()->user()->profile_url)
+                                <img src="{{ auth()->user()->profile_url }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                                <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            @if(auth()->user()->isAdmin())
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-bold hover:bg-indigo-100 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                    <span>Admin</span>
+                                </a>
+                            @endif
+                            <a href="{{ route('profile') }}" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <span>Profile</span>
+                            </a>
+                        </div>
+
+                        <form method="POST" action="{{ route('logout') }}" class="pt-1">
+                            @csrf
+                            <button type="submit" class="w-full py-2 px-3 rounded-xl text-center text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                @endauth
+            </div>
+        </div>
+    </div>
 
     <!-- Top-Right Toast Notifications -->
     @include('partials.toast')
@@ -331,26 +416,45 @@
             }
         };
 
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            const hamburger = document.getElementById('hamburger-icon');
-            const close = document.getElementById('close-icon');
-            const btn = document.getElementById('mobile-menu-btn');
-            if (!menu) return;
+        function openMobileDrawer() {
+            const container = document.getElementById('mobile-drawer-container');
+            const backdrop = document.getElementById('mobile-drawer-backdrop');
+            const panel = document.getElementById('mobile-drawer-panel');
+            if (!container || !backdrop || !panel) return;
 
-            const isHidden = menu.classList.contains('hidden');
-            if (isHidden) {
-                menu.classList.remove('hidden');
-                if (hamburger) hamburger.classList.add('hidden');
-                if (close) close.classList.remove('hidden');
-                if (btn) btn.setAttribute('aria-expanded', 'true');
-            } else {
-                menu.classList.add('hidden');
-                if (hamburger) hamburger.classList.remove('hidden');
-                if (close) close.classList.add('hidden');
-                if (btn) btn.setAttribute('aria-expanded', 'false');
-            }
+            container.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+
+            requestAnimationFrame(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                panel.classList.remove('translate-x-full');
+                panel.classList.add('translate-x-0');
+            });
         }
+
+        function closeMobileDrawer() {
+            const container = document.getElementById('mobile-drawer-container');
+            const backdrop = document.getElementById('mobile-drawer-backdrop');
+            const panel = document.getElementById('mobile-drawer-panel');
+            if (!container || !backdrop || !panel) return;
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('translate-x-0');
+            panel.classList.add('translate-x-full');
+            document.body.classList.remove('overflow-hidden');
+
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 300);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileDrawer();
+            }
+        });
 
         function toggleMobileCategories() {
             const dropdown = document.getElementById('mobile-categories-dropdown');
