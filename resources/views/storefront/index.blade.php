@@ -3,31 +3,24 @@
 @section('content')
 <div class="space-y-12">
     <!-- Hero Banner (ShopEase Style matching Reference Image) -->
-    <div class="relative rounded-[2rem] overflow-hidden shadow-xs bg-[#DCD8F7] border border-purple-100/50 min-h-[380px] sm:min-h-[440px] flex items-center">
-        <!-- Background Layer with 3D Earbuds and Purple Waves -->
-        <div class="absolute inset-0 bg-cover bg-no-repeat bg-right lg:bg-center pointer-events-none"
-             style="background-image: url('{{ asset('images/hero-earbuds.jpg') }}');">
+    <div class="relative w-full rounded-3xl sm:rounded-[2.5rem] overflow-hidden shadow-xs border border-purple-100/50 bg-[#DDD6FB]">
+        <!-- Screen-reader and SEO Accessibility Content -->
+        <div class="sr-only">
+            <h1>Smart Shopping Better Living</h1>
+            <p>Discover amazing products with best prices and fast delivery.</p>
+            <a href="#products-catalog">Shop Now</a>
         </div>
 
-        <!-- Left Gradient Overlay for Perfect Contrast -->
-        <div class="absolute inset-y-0 left-0 w-full lg:w-3/5 bg-gradient-to-r from-[#D8D2FB] via-[#D8D2FB]/90 to-transparent pointer-events-none"></div>
+        <!-- Exact High-Resolution Banner Graphic from Reference Design -->
+        <img src="{{ asset('images/shopease-banner-2x.jpg') }}" 
+             alt="Smart Shopping Better Living - ShopEase" 
+             class="w-full h-auto object-cover block select-none">
 
-        <!-- Content Overlay -->
-        <div class="relative z-10 py-12 sm:py-20 px-8 sm:px-14 max-w-xl space-y-6">
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-[#17123F] tracking-tight leading-[1.08]">
-                Smart Shopping<br>
-                <span>Better Living</span>
-            </h1>
-            <p class="text-[#494274] text-sm sm:text-base font-medium max-w-md leading-relaxed">
-                Discover amazing products with<br class="hidden sm:inline"> best prices and fast delivery.
-            </p>
-            <div class="pt-2">
-                <a href="#products-catalog" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#5946F5] hover:bg-[#4C38E6] text-white font-bold text-sm shadow-md shadow-indigo-300/50 transition hover:scale-105 duration-200">
-                    <span>Shop Now</span>
-                    <span class="text-base font-bold">→</span>
-                </a>
-            </div>
-        </div>
+        <!-- Interactive Clickable Hotspot over "Shop Now →" Button -->
+        <a href="#products-catalog" 
+           class="absolute left-[4.5%] bottom-[13%] w-[19%] h-[16%] min-w-[130px] rounded-2xl cursor-pointer transition hover:ring-4 hover:ring-indigo-300/50 active:scale-95" 
+           title="Shop Now">
+        </a>
     </div>
 
     <!-- Trust Badges Strip (Reference Image Match) -->
