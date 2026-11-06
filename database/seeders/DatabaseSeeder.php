@@ -50,5 +50,8 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+        // 3. Seed E-Commerce Catalog (Categories, Subcategories, Products)
+        $this->call(EcommerceCatalogSeeder::class);
     }
 }
