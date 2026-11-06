@@ -30,7 +30,7 @@
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Category Image</label>
             @if($category->image)
                 <div class="mb-2 flex items-center gap-3">
-                    <img src="{{ str_starts_with($category->image, 'http') ? $category->image : Storage::disk('public')->url($category->image) }}" class="w-12 h-12 rounded-lg object-cover">
+                    <img src="{{ $category->image_url }}" class="w-12 h-12 rounded-lg object-cover">
                     <span class="text-xs text-slate-400">Current image on file</span>
                 </div>
             @endif
@@ -45,3 +45,4 @@
     </form>
 </div>
 @endsection
+

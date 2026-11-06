@@ -6,10 +6,10 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Subcategory;
+use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -50,7 +50,7 @@ class ProductController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = FileUploadService::upload($request->file('image'), 'products');
         }
 
         $product = Product::create($data);
@@ -76,10 +76,7 @@ class ProductController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         if ($request->hasFile('image')) {
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = FileUploadService::replace($product->image, $request->file('image'), 'products');
         }
 
         $product->update($data);
@@ -93,9 +90,7 @@ class ProductController extends Controller
 
     public function destroy(Request $request, Product $product): RedirectResponse|JsonResponse
     {
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-        }
+        FileUploadService::delete($product->image);
 
         $product->delete();
 

@@ -30,7 +30,7 @@
                     <tr class="hover:bg-slate-50/60 transition">
                         <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-3">
                             @if($category->image)
-                                <img src="{{ str_starts_with($category->image, 'http') ? $category->image : Storage::disk('public')->url($category->image) }}" class="w-8 h-8 rounded-lg object-cover">
+                                <img src="{{ $category->image_url }}" class="w-8 h-8 rounded-lg object-cover">
                             @else
                                 <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
                                     {{ substr($category->name, 0, 1) }}
@@ -75,3 +75,4 @@
     <div>{{ $categories->links() }}</div>
 </div>
 @endsection
+

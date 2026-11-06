@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
+use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -35,7 +35,7 @@ class CategoryController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $data['image'] = FileUploadService::upload($request->file('image'), 'categories');
         }
 
         $category = Category::create($data);
@@ -58,10 +58,7 @@ class CategoryController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         if ($request->hasFile('image')) {
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
-                Storage::disk('public')->delete($category->image);
-            }
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $data['image'] = FileUploadService::replace($category->image, $request->file('image'), 'categories');
         }
 
         $category->update($data);
@@ -75,9 +72,7 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category): RedirectResponse|JsonResponse
     {
-        if ($category->image && Storage::disk('public')->exists($category->image)) {
-            Storage::disk('public')->delete($category->image);
-        }
+        FileUploadService::delete($category->image);
 
         $category->delete();
 

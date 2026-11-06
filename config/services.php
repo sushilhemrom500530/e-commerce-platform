@@ -48,4 +48,10 @@ return [
         'keys_url' => env('APPLE_KEYS_URL', 'https://appleid.apple.com/auth/keys'),
     ],
 
+    'cloudinary' => [
+        'cloud_name' => env('CLOUDINARY_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+    ],
+
 ];
