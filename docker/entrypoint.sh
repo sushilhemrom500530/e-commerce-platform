@@ -37,3 +37,4 @@ fi
 
 echo "==> Starting Nginx & PHP-FPM via Supervisord..."
 exec /usr/bin/supervisord -c /etc/supervisord.conf
+
