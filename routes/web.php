@@ -37,7 +37,7 @@ Route::get('/health', function (): JsonResponse {
         }
     }
 
-    $appName = (string) config('app.name', 'PL Server');
+    $appName = (string) config('app.name', 'E-Commerce Platform');
 
     return ApiResponse::formatResponse([
         'name' => $appName,

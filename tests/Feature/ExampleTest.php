@@ -30,9 +30,9 @@ class ExampleTest extends TestCase
             ->assertJson([
                 'statusCode' => 200,
                 'success' => true,
-                'message' => 'PL Server is running smoothly.',
+                'message' => 'E-Commerce Platform is running smoothly.',
                 'results' => [
-                    'name' => 'PL Server',
+                    'name' => 'E-Commerce Platform',
                     'status' => 'online',
                 ],
             ])
