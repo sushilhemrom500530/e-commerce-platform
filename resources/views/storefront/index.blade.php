@@ -86,45 +86,70 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <!-- 1. Laptops / Electronics Card -->
-            <a href="{{ route('storefront.products', ['category' => 'electronics']) }}" class="group text-center space-y-3 block">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+            <!-- 1. Electronics (Laptops & Mobiles) -->
+            <a href="{{ route('storefront.products', ['category' => 'electronics']) }}" class="group text-center space-y-2.5 block">
                 <div class="aspect-[4/3] rounded-3xl bg-[#EEF2FF] border border-indigo-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&auto=format&fit=crop&q=80" 
-                         alt="Laptops & Tech" 
+                         alt="Electronics - Laptops & Mobiles" 
                          class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
                 </div>
-                <h3 class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition">Laptops</h3>
-            </a>
-
-            <!-- 2. Mobiles Card -->
-            <a href="{{ route('storefront.products', ['category' => 'electronics']) }}" class="group text-center space-y-3 block">
-                <div class="aspect-[4/3] rounded-3xl bg-[#E0F2FE] border border-sky-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=500&auto=format&fit=crop&q=80" 
-                         alt="Mobiles" 
-                         class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition">Electronics</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Laptops & Mobiles</p>
                 </div>
-                <h3 class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition">Mobiles</h3>
             </a>
 
-            <!-- 3. Watches Card -->
-            <a href="{{ route('storefront.products', ['category' => 'sports']) }}" class="group text-center space-y-3 block">
-                <div class="aspect-[4/3] rounded-3xl bg-[#FCE7F3] border border-pink-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80" 
-                         alt="Watches" 
-                         class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
-                </div>
-                <h3 class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition">Watches</h3>
-            </a>
-
-            <!-- 4. Fashion Card -->
-            <a href="{{ route('storefront.products', ['category' => 'fashion']) }}" class="group text-center space-y-3 block">
+            <!-- 2. Fashion -->
+            <a href="{{ route('storefront.products', ['category' => 'fashion']) }}" class="group text-center space-y-2.5 block">
                 <div class="aspect-[4/3] rounded-3xl bg-[#FEF3C7] border border-amber-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80" 
-                         alt="Fashion" 
+                         alt="Fashion & Apparel" 
                          class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
                 </div>
-                <h3 class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition">Fashion</h3>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition">Fashion</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Shoes & Apparel</p>
+                </div>
+            </a>
+
+            <!-- 3. Home & Living -->
+            <a href="{{ route('storefront.products', ['category' => 'home-living']) }}" class="group text-center space-y-2.5 block">
+                <div class="aspect-[4/3] rounded-3xl bg-[#F0FDF4] border border-emerald-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80" 
+                         alt="Home & Living" 
+                         class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition">Home & Living</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Decor & Lighting</p>
+                </div>
+            </a>
+
+            <!-- 4. Sports & Watches -->
+            <a href="{{ route('storefront.products', ['category' => 'sports']) }}" class="group text-center space-y-2.5 block">
+                <div class="aspect-[4/3] rounded-3xl bg-[#FCE7F3] border border-pink-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80" 
+                         alt="Sports & Watches" 
+                         class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition">Sports</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Watches & Fitness</p>
+                </div>
+            </a>
+
+            <!-- 5. Books -->
+            <a href="{{ route('storefront.products', ['category' => 'books']) }}" class="group text-center space-y-2.5 block">
+                <div class="aspect-[4/3] rounded-3xl bg-[#E0F2FE] border border-sky-100/60 p-4 flex items-center justify-center transition group-hover:shadow-md group-hover:-translate-y-1 duration-300 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80" 
+                         alt="Books & Learning" 
+                         class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition">Books</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Bestsellers & Knowledge</p>
+                </div>
             </a>
         </div>
     </section>
@@ -172,26 +197,28 @@
                 <!-- Products Grid for this Category: All Clickable to Product Details -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @foreach($category->products as $product)
-                        <div class="group bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition flex flex-col justify-between overflow-hidden">
-                            <!-- Image Frame: Clickable to Product Details -->
-                            <a href="{{ route('storefront.product', $product->slug) }}" class="relative aspect-[4/3] bg-slate-100 overflow-hidden block">
-                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-xs hover:shadow-md transition p-4 flex flex-col justify-between group">
+                            <!-- Product Image Canvas -->
+                            <a href="{{ route('storefront.product', $product->slug) }}" class="aspect-square bg-[#F8F9FD] rounded-xl overflow-hidden flex items-center justify-center p-3 relative block">
+                                <img src="{{ $product->image_url }}" 
+                                     alt="{{ $product->name }}" 
+                                     class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
                                 @if($product->discount_percentage)
-                                    <span class="absolute top-3 left-3 bg-rose-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                    <span class="absolute top-2.5 left-2.5 bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs">
                                         -{{ $product->discount_percentage }}%
                                     </span>
                                 @endif
                                 @if($product->subcategory)
-                                    <span class="absolute top-3 right-3 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-xs">
+                                    <span class="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-xs">
                                         {{ $product->subcategory->name }}
                                     </span>
                                 @endif
-                            </div>
+                            </a>
 
-                            <!-- Card Body: Clickable to Product Details -->
-                            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <!-- Card Info -->
+                            <div class="mt-3.5 space-y-2 flex-1 flex flex-col justify-between">
                                 <div>
-                                    <span class="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider block">
+                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">
                                         <a href="{{ route('storefront.products', ['category' => $category->slug]) }}" class="hover:underline">
                                             {{ $category->name }}
                                         </a>
@@ -201,33 +228,31 @@
                                             {{ $product->name }}
                                         </a>
                                     </h3>
-                                    <p class="text-xs text-slate-500 line-clamp-2 mt-1">
-                                        {{ $product->description }}
-                                    </p>
-                                </div>
 
-                                <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-lg font-black text-slate-900">
-                                            ৳{{ number_format($product->new_price, 2) }}
-                                        </div>
+                                    <!-- Price Row: Highlighted Current Price & Strikethrough Old Price -->
+                                    <div class="flex items-baseline gap-2 mt-1">
+                                        <span class="font-black text-rose-600 text-base">
+                                            ৳{{ number_format($product->new_price, 0) }}
+                                        </span>
                                         @if($product->old_price && $product->old_price > $product->new_price)
-                                            <div class="text-xs text-slate-400 line-through">
-                                                ৳{{ number_format($product->old_price, 2) }}
-                                            </div>
+                                            <span class="text-xs text-slate-400 line-through">
+                                                ৳{{ number_format($product->old_price, 0) }}
+                                            </span>
                                         @endif
                                     </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <button type="button" 
-                                                onclick="window.showAddToCartToast('{{ addslashes($product->name) }}')"
-                                                class="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition cursor-pointer" 
-                                                title="Add to Cart">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                        </button>
-                                        <a href="{{ route('storefront.product', $product->slug) }}" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-indigo-600 transition shadow-xs">
-                                            Details
-                                        </a>
-                                    </div>
+                                </div>
+
+                                <div class="pt-2 flex items-center gap-2">
+                                    <button type="button" 
+                                            onclick="window.showAddToCartToast('{{ addslashes($product->name) }}')"
+                                            class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs hover:shadow flex items-center justify-center gap-1.5 cursor-pointer">
+                                        <span>Add to Cart</span>
+                                    </button>
+                                    <a href="{{ route('storefront.product', $product->slug) }}" 
+                                       class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+                                       title="View Details">
+                                        Details
+                                    </a>
                                 </div>
                             </div>
                         </div>

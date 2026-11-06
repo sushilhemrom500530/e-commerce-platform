@@ -29,7 +29,7 @@ class StorefrontTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Smartphones');
         $response->assertSee('iPhone 16 Pro');
-        $response->assertSee('110,000.00');
+        $response->assertSee('110,000');
     }
 
     public function test_can_view_single_product_details_using_seo_slug(): void

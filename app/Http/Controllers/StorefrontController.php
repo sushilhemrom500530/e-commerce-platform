@@ -17,16 +17,33 @@ class StorefrontController extends Controller
      */
     public function index(Request $request): View|JsonResponse
     {
+        $featuredSlugs = ['electronics', 'fashion', 'home-living', 'sports', 'books'];
         $homeCategories = Category::where('is_active', true)
+            ->whereIn('slug', $featuredSlugs)
             ->whereHas('products', fn ($q) => $q->where('is_active', true))
             ->with([
                 'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
                 'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
             ])
             ->withCount('products')
-            ->orderBy('id', 'asc')
-            ->take(5)
-            ->get();
+            ->get()
+            ->sortBy(fn ($cat) => array_search($cat->slug, $featuredSlugs))
+            ->values();
+
+        if ($homeCategories->count() < 5) {
+            $existingIds = $homeCategories->pluck('id')->all();
+            $additional = Category::where('is_active', true)
+                ->whereNotIn('id', $existingIds)
+                ->whereHas('products', fn ($q) => $q->where('is_active', true))
+                ->with([
+                    'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
+                    'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
+                ])
+                ->withCount('products')
+                ->take(5 - $homeCategories->count())
+                ->get();
+            $homeCategories = $homeCategories->concat($additional);
+        }
 
         $categories = Category::where('is_active', true)->withCount('products')->get();
 
