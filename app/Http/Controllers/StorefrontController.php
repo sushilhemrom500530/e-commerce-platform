@@ -13,23 +13,34 @@ use Illuminate\View\View;
 class StorefrontController extends Controller
 {
     /**
-     * Display all products organized by their respective subcategories.
+     * Display all products organized by 5 primary categories on the home page.
      */
     public function index(Request $request): View|JsonResponse
     {
+        $homeCategories = Category::where('is_active', true)
+            ->whereHas('products', fn ($q) => $q->where('is_active', true))
+            ->with([
+                'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
+                'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
+            ])
+            ->withCount('products')
+            ->orderBy('id', 'asc')
+            ->take(5)
+            ->get();
+
+        $categories = Category::where('is_active', true)->withCount('products')->get();
+
         $subcategories = Subcategory::where('is_active', true)
             ->whereHas('products', fn ($q) => $q->where('is_active', true))
             ->with(['category', 'products' => fn ($q) => $q->where('is_active', true)->latest()])
             ->orderBy('name')
             ->get();
 
-        $categories = Category::where('is_active', true)->withCount('products')->get();
-
         if ($request->expectsJson() && ! $request->header('X-Inertia')) {
-            return $this->sendResponse($subcategories, 'Catalog retrieved successfully.');
+            return $this->sendResponse($homeCategories, 'Catalog retrieved successfully.');
         }
 
-        return view('storefront.index', compact('subcategories', 'categories'));
+        return view('storefront.index', compact('homeCategories', 'categories', 'subcategories'));
     }
 
     /**
