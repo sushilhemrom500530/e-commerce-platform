@@ -1,4 +1,4 @@
-@extends('layouts.app')
+ @extends('layouts.app')
 
 @section('title', ($selectedCategory ? $selectedCategory->name . ' - ' : '') . 'All Products - ' . config('app.name', 'ShopEase'))
 
