@@ -21,7 +21,7 @@
                 Discover amazing products with<br class="hidden sm:inline"> best prices and fast delivery.
             </p>
             <div class="pt-2">
-                <a href="#products-catalog" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#5945F7] hover:bg-[#4C37E8] text-white font-bold text-sm shadow-lg shadow-indigo-400/30 transition hover:scale-105 duration-200">
+                <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#5945F7] hover:bg-[#4C37E8] text-white font-bold text-sm shadow-lg shadow-indigo-400/30 transition hover:scale-105 duration-200">
                     <span>Shop Now</span>
                     <span class="text-base font-bold">→</span>
                 </a>
@@ -80,7 +80,7 @@
     <section class="space-y-6">
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-black text-slate-900 tracking-tight">Top Categories</h2>
-            <a href="#products-catalog" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+            <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
                 <span>View All</span>
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>

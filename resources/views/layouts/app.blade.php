@@ -64,7 +64,7 @@
                     <!-- Middle Navigation Links -->
                     <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
                         <a href="{{ route('storefront.index') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.index') && !request('category') ? 'text-indigo-600 font-bold' : '' }}">Home</a>
-                        <a href="#products-catalog" class="transition hover:text-indigo-600">Shop</a>
+                        <a href="{{ route('storefront.products') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.products') ? 'text-indigo-600 font-bold' : '' }}">Shop</a>
                         
                         <!-- Categories Dropdown -->
                         <div class="relative group">
@@ -77,7 +77,7 @@
                                     $navCategories = \App\Models\Category::where('is_active', true)->orderBy('name')->take(6)->get();
                                 @endphp
                                 @foreach($navCategories as $navCat)
-                                    <a href="{{ route('storefront.index', ['category' => $navCat->slug]) }}" class="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                                    <a href="{{ route('storefront.products', ['category' => $navCat->slug]) }}" class="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
                                         {{ $navCat->name }}
                                     </a>
                                 @endforeach
@@ -91,7 +91,7 @@
                     <!-- Right Side Icons & Actions -->
                     <div class="flex items-center gap-4">
                         <!-- Search Form / Icon -->
-                        <form action="{{ route('storefront.index') }}" method="GET" class="relative hidden sm:block">
+                        <form action="{{ route('storefront.products') }}" method="GET" class="relative hidden sm:block">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." class="pl-9 pr-3 py-1.5 rounded-full bg-slate-100 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none w-36 focus:w-56 transition-all duration-300">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -170,7 +170,28 @@
                 lastScrollY = currentScrollY;
             }, { passive: true });
         });
+
+        window.showAddToCartToast = function(productName) {
+            const toast = document.getElementById('cart-toast');
+            const toastTitle = document.getElementById('cart-toast-title');
+            if (toast && toastTitle) {
+                toastTitle.textContent = productName + ' added to cart!';
+                toast.classList.remove('translate-y-24', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-24', 'opacity-0');
+                }, 2500);
+            }
+        };
     </script>
+
+    <!-- Global Cart Toast Notification -->
+    <div id="cart-toast" class="fixed bottom-6 right-6 z-50 bg-slate-900/95 backdrop-blur text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none border border-slate-700/50">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">✓</div>
+        <div>
+            <p class="text-xs font-bold" id="cart-toast-title">Added to cart!</p>
+            <p class="text-[11px] text-slate-400">Shopping cart item updated</p>
+        </div>
+    </div>
     @stack('scripts')
 </body>
 </html>

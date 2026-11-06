@@ -32,6 +32,61 @@ class StorefrontController extends Controller
     }
 
     /**
+     * Display all products catalog with category filtering, sorting, and pagination.
+     */
+    public function products(Request $request): View|JsonResponse
+    {
+        $categories = Category::where('is_active', true)
+            ->withCount('products')
+            ->orderBy('name')
+            ->get();
+
+        $selectedCategory = null;
+        if ($request->filled('category')) {
+            $catParam = (string) $request->query('category');
+            $selectedCategory = is_numeric($catParam)
+                ? Category::where('id', (int) $catParam)->first()
+                : Category::where('slug', $catParam)->first();
+        }
+
+        $query = Product::with(['category', 'subcategory'])
+            ->where('is_active', true);
+
+        if ($selectedCategory) {
+            $query->where('category_id', $selectedCategory->id);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->query('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $sort = $request->query('sort', 'newest');
+        match ($sort) {
+            'price_asc' => $query->orderBy('new_price', 'asc'),
+            'price_desc' => $query->orderBy('new_price', 'desc'),
+            'name_asc' => $query->orderBy('name', 'asc'),
+            'name_desc' => $query->orderBy('name', 'desc'),
+            default => $query->latest('id'),
+        };
+
+        $products = $query->paginate(9)->withQueryString();
+
+        if ($request->expectsJson() && ! $request->header('X-Inertia')) {
+            return $this->sendResponse([
+                'products' => $products,
+                'categories' => $categories,
+                'selected_category' => $selectedCategory,
+            ], 'Products catalog retrieved successfully.');
+        }
+
+        return view('storefront.products', compact('products', 'categories', 'selectedCategory', 'sort'));
+    }
+
+    /**
      * Display individual product details using its SEO-friendly slug.
      */
     public function show(Request $request, Product $product): View|JsonResponse

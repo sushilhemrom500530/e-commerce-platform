@@ -78,4 +78,78 @@ class StorefrontTest extends TestCase
         $response->assertSee('Watches');
         $response->assertSee('Fashion');
     }
+
+    public function test_can_view_all_products_catalog_page(): void
+    {
+        $category = Category::factory()->create(['name' => 'Electronics']);
+        $sub = Subcategory::factory()->create(['category_id' => $category->id, 'name' => 'Mobile']);
+        Product::factory()->create([
+            'category_id' => $category->id,
+            'subcategory_id' => $sub->id,
+            'name' => 'iPhone 16',
+            'old_price' => 120000,
+            'new_price' => 110000,
+        ]);
+
+        $response = $this->get('/products');
+
+        $response->assertStatus(200);
+        $response->assertSee('All Products');
+        $response->assertSee('Categories');
+        $response->assertSee('iPhone 16');
+        $response->assertSee('110,000');
+        $response->assertSee('Add to Cart');
+    }
+
+    public function test_can_filter_products_by_category_on_catalog_page(): void
+    {
+        $electronics = Category::factory()->create(['name' => 'Electronics', 'slug' => 'electronics']);
+        $fashion = Category::factory()->create(['name' => 'Fashion', 'slug' => 'fashion']);
+
+        $subEl = Subcategory::factory()->create(['category_id' => $electronics->id]);
+        $subFa = Subcategory::factory()->create(['category_id' => $fashion->id]);
+
+        Product::factory()->create([
+            'category_id' => $electronics->id,
+            'subcategory_id' => $subEl->id,
+            'name' => 'MacBook Air M4',
+        ]);
+
+        Product::factory()->create([
+            'category_id' => $fashion->id,
+            'subcategory_id' => $subFa->id,
+            'name' => 'Nike Shoes',
+        ]);
+
+        $response = $this->get('/products?category=electronics');
+
+        $response->assertStatus(200);
+        $response->assertSee('MacBook Air M4');
+        $response->assertDontSee('Nike Shoes');
+    }
+
+    public function test_can_sort_products_by_price_on_catalog_page(): void
+    {
+        $category = Category::factory()->create(['name' => 'Electronics']);
+        $sub = Subcategory::factory()->create(['category_id' => $category->id]);
+
+        Product::factory()->create([
+            'category_id' => $category->id,
+            'subcategory_id' => $sub->id,
+            'name' => 'Budget Watch',
+            'new_price' => 2000,
+        ]);
+
+        Product::factory()->create([
+            'category_id' => $category->id,
+            'subcategory_id' => $sub->id,
+            'name' => 'Premium Laptop',
+            'new_price' => 150000,
+        ]);
+
+        $response = $this->get('/products?sort=price_asc');
+
+        $response->assertStatus(200);
+        $response->assertSeeInOrder(['Budget Watch', 'Premium Laptop']);
+    }
 }

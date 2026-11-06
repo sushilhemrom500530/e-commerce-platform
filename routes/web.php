@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Storefront
 Route::get('/', [StorefrontController::class, 'index'])->name('storefront.index');
+Route::get('/products', [StorefrontController::class, 'products'])->name('storefront.products');
 Route::get('/product/{product:slug}', [StorefrontController::class, 'show'])->name('storefront.product');
 
 // Server Health Route

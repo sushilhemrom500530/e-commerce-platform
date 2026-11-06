@@ -23,20 +23,12 @@ class EcommerceCatalogSeeder extends Seeder
                         'description' => 'Flagship, premium, and budget smartphones.',
                         'products' => [
                             [
-                                'name' => 'Apple iPhone 16',
-                                'description' => 'Apple iPhone 16 with A18 Bionic chip, advanced dual-camera system, Camera Control button, and stunning Super Retina XDR display.',
+                                'name' => 'iPhone 16',
+                                'description' => 'Apple iPhone 16 with A18 chip, Camera Control, and 48MP Fusion camera.',
                                 'image' => 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
                                 'old_price' => 120000,
                                 'new_price' => 110000,
                                 'stock' => 25,
-                            ],
-                            [
-                                'name' => 'Samsung Galaxy S24 Ultra',
-                                'description' => 'Samsung flagship smartphone with Galaxy AI, titanium frame, 200MP camera, and integrated S-Pen.',
-                                'image' => 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 145000,
-                                'new_price' => 135000,
-                                'stock' => 18,
                             ],
                         ],
                     ],
@@ -45,20 +37,40 @@ class EcommerceCatalogSeeder extends Seeder
                         'description' => 'High performance ultrabooks and workstation laptops.',
                         'products' => [
                             [
-                                'name' => 'MacBook Pro 16 M3 Max',
-                                'description' => 'Supercharged for pros with M3 Max 16-core CPU, 40-core GPU, 36GB unified memory, and Liquid Retina XDR display.',
+                                'name' => 'MacBook Air M4',
+                                'description' => 'Supercharged by Apple M4 silicon with Liquid Retina display and all-day battery life.',
                                 'image' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 320000,
-                                'new_price' => 295000,
-                                'stock' => 10,
+                                'old_price' => 150000,
+                                'new_price' => 135000,
+                                'stock' => 15,
                             ],
+                        ],
+                    ],
+                    [
+                        'name' => 'Audio',
+                        'description' => 'Wireless noise-canceling headphones and earbuds.',
+                        'products' => [
                             [
-                                'name' => 'Dell XPS 15 OLED',
-                                'description' => 'Premium Windows laptop with 3.5K OLED touchscreen, Intel Core i9 processor, and NVIDIA GeForce RTX 4060 graphics.',
-                                'image' => 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 240000,
-                                'new_price' => 215000,
-                                'stock' => 12,
+                                'name' => 'Sony Headphones',
+                                'description' => 'Industry-leading wireless noise canceling stereo headphones with premium sound.',
+                                'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 22000,
+                                'new_price' => 18000,
+                                'stock' => 30,
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'Wearables',
+                        'description' => 'Smart watches, fitness trackers, and health monitors.',
+                        'products' => [
+                            [
+                                'name' => 'Smart Watch',
+                                'description' => 'Advanced smartwatch with fitness tracking, heart-rate sensor, and OLED display.',
+                                'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 15000,
+                                'new_price' => 12000,
+                                'stock' => 35,
                             ],
                         ],
                     ],
@@ -70,37 +82,71 @@ class EcommerceCatalogSeeder extends Seeder
                 'image' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80',
                 'subcategories' => [
                     [
-                        'name' => "Men's Clothing",
-                        'description' => 'Shirts, jackets, trousers, and streetwear.',
-                        'products' => [
-                            [
-                                'name' => 'Classic Slim-Fit Oxford Shirt',
-                                'description' => '100% breathable Egyptian cotton tailored button-down shirt designed for all-day comfort and timeless appeal.',
-                                'image' => 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 3200,
-                                'new_price' => 2400,
-                                'stock' => 50,
-                            ],
-                            [
-                                'name' => 'Vintage Washed Denim Jacket',
-                                'description' => 'Heavyweight durable denim jacket with copper hardware, relaxed fit, and heritage wash styling.',
-                                'image' => 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 5500,
-                                'new_price' => 4500,
-                                'stock' => 30,
-                            ],
-                        ],
-                    ],
-                    [
                         'name' => 'Shoes',
                         'description' => 'Handcrafted formal shoes, casual loafers, and athletic sneakers.',
                         'products' => [
                             [
-                                'name' => 'Handcrafted Italian Leather Loafers',
-                                'description' => 'Supple full-grain Italian calfskin leather loafers with cushioned insole and hand-stitched apron toe.',
-                                'image' => 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 7500,
-                                'new_price' => 5900,
+                                'name' => 'Nike Shoes',
+                                'description' => 'Lightweight running and lifestyle sneakers designed for comfort and performance.',
+                                'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 9000,
+                                'new_price' => 7500,
+                                'stock' => 45,
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'Bags & Accessories',
+                        'description' => 'Everyday backpacks, laptop bags, and travel gear.',
+                        'products' => [
+                            [
+                                'name' => 'Backpack',
+                                'description' => 'Durable water-resistant urban backpack with padded laptop sleeve and multi-compartments.',
+                                'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 2500,
+                                'new_price' => 2000,
+                                'stock' => 50,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Home & Living',
+                'description' => 'Modern furniture, ambient lighting, and home accessories.',
+                'image' => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80',
+                'subcategories' => [
+                    [
+                        'name' => 'Home Decor',
+                        'description' => 'Ambient lighting, rugs, and decorative pieces.',
+                        'products' => [
+                            [
+                                'name' => 'Minimalist Table Lamp',
+                                'description' => 'Warm LED designer bedside lamp with dimmable touch control.',
+                                'image' => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 3500,
+                                'new_price' => 2800,
+                                'stock' => 25,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Sports',
+                'description' => 'Sports equipment, workout gear, and outdoor accessories.',
+                'image' => 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
+                'subcategories' => [
+                    [
+                        'name' => 'Fitness Gear',
+                        'description' => 'Dumbbells, resistance bands, and gym gear.',
+                        'products' => [
+                            [
+                                'name' => 'Adjustable Dumbbell Set',
+                                'description' => 'Solid cast iron quick-adjust dumbbells for full-body home workouts.',
+                                'image' => 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 6000,
+                                'new_price' => 4800,
                                 'stock' => 20,
                             ],
                         ],
@@ -108,21 +154,21 @@ class EcommerceCatalogSeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Grocery',
-                'description' => 'Organic fresh groceries, premium beverages, and pantry essentials.',
-                'image' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80',
+                'name' => 'Books',
+                'description' => 'Bestselling novels, self-improvement books, and educational literature.',
+                'image' => 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
                 'subcategories' => [
                     [
-                        'name' => 'Beverages',
-                        'description' => 'Specialty coffee roasts, artisan teas, and organic juices.',
+                        'name' => 'Self-Development',
+                        'description' => 'Personal growth, productivity, and leadership books.',
                         'products' => [
                             [
-                                'name' => 'Single-Origin Ethiopian Yirgacheffe Coffee',
-                                'description' => 'Freshly roasted whole bean arabica coffee offering delicate notes of jasmine floral, citrus bergamot, and honey sweetness.',
-                                'image' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80',
-                                'old_price' => 1800,
-                                'new_price' => 1500,
-                                'stock' => 40,
+                                'name' => 'Atomic Habits',
+                                'description' => 'An easy and proven way to build good habits and break bad ones by James Clear.',
+                                'image' => 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
+                                'old_price' => 950,
+                                'new_price' => 750,
+                                'stock' => 60,
                             ],
                         ],
                     ],
