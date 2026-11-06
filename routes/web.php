@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'index'])->name('storefront.index');
 Route::get('/products', [StorefrontController::class, 'products'])->name('storefront.products');
 Route::get('/product/{product:slug}', [StorefrontController::class, 'show'])->name('storefront.product');
+Route::get('/about', [StorefrontController::class, 'about'])->name('storefront.about');
+Route::get('/contact', [StorefrontController::class, 'contact'])->name('storefront.contact');
+Route::post('/contact', [StorefrontController::class, 'submitContact'])->name('storefront.contact.submit');
 
 // Server Health Route
 Route::get('/health', function (): JsonResponse {

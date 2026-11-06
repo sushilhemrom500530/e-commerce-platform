@@ -152,4 +152,51 @@ class StorefrontTest extends TestCase
         $response->assertStatus(200);
         $response->assertSeeInOrder(['Budget Watch', 'Premium Laptop']);
     }
+
+    public function test_can_view_about_us_page(): void
+    {
+        $response = $this->get('/about');
+
+        $response->assertStatus(200);
+        $response->assertSee('Our Story', false);
+        $response->assertSee('Zero-Compromise Authenticity', false);
+        $response->assertSee('Honest & Fair Pricing', false);
+        $response->assertSee('Real Human Support', false);
+        $response->assertSee('25,000+', false);
+    }
+
+    public function test_can_view_contact_page(): void
+    {
+        $response = $this->get('/contact');
+
+        $response->assertStatus(200);
+        $response->assertSee("We're Here to Help", false);
+        $response->assertSee('Visit Our Office', false);
+        $response->assertSee('Call Support', false);
+        $response->assertSee('support@shopease.com.bd', false);
+        $response->assertSee('Frequently Asked Questions', false);
+    }
+
+    public function test_can_submit_contact_inquiry_form(): void
+    {
+        $payload = [
+            'name' => 'Sushil Hemrom',
+            'email' => 'sushil@example.com',
+            'phone' => '+8801700123456',
+            'subject' => 'Order Status & Delivery Tracking',
+            'message' => 'Hello, I would like to check on the delivery timeline for my recent order.',
+        ];
+
+        $response = $this->post('/contact', $payload);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+    }
+
+    public function test_contact_form_validates_required_fields(): void
+    {
+        $response = $this->post('/contact', []);
+
+        $response->assertSessionHasErrors(['name', 'email', 'subject', 'message']);
+    }
 }

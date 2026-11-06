@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -104,5 +105,39 @@ class StorefrontController extends Controller
             ->get();
 
         return view('storefront.show', compact('product', 'relatedProducts'));
+    }
+
+    /**
+     * Display the About Us story, values, and company overview.
+     */
+    public function about(): View
+    {
+        return view('storefront.about');
+    }
+
+    /**
+     * Display the Contact Support, office details, and inquiry form.
+     */
+    public function contact(): View
+    {
+        return view('storefront.contact');
+    }
+
+    /**
+     * Handle incoming contact inquiries with validation and user feedback.
+     */
+    public function submitContact(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150'],
+            'phone' => ['nullable', 'string', 'max:25'],
+            'subject' => ['required', 'string', 'max:120'],
+            'message' => ['required', 'string', 'min:10', 'max:2500'],
+        ]);
+
+        logger()->info('Storefront customer contact inquiry received:', $validated);
+
+        return back()->with('success', 'Thank you, '.$validated['name'].'! Your message has reached our support team in Dhaka. We will respond within 2-4 business hours.');
     }
 }

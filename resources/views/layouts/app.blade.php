@@ -4,11 +4,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? config('app.name', 'E-Commerce Platform') }}</title>
+    <script>
+        tailwind = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            200: '#DDD6FE',
+                            300: '#C4B5FD',
+                            400: '#A78BFA',
+                            500: '#5945F7',
+                            600: '#5046E5',
+                            700: '#4338CA',
+                            800: '#3730A3',
+                            900: '#312E81',
+                            DEFAULT: '#5945F7',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #5945F7;
+            --primary-dark: #4338CA;
+            --primary-light: #EEF2FF;
+        }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
@@ -84,8 +112,8 @@
                             </div>
                         </div>
 
-                        <a href="#about-section" class="transition hover:text-indigo-600">About</a>
-                        <a href="#contact-section" class="transition hover:text-indigo-600">Contact</a>
+                        <a href="{{ route('storefront.about') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.about') ? 'text-indigo-600 font-bold' : '' }}">About</a>
+                        <a href="{{ route('storefront.contact') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.contact') ? 'text-indigo-600 font-bold' : '' }}">Contact</a>
                     </nav>
 
                     <!-- Right Side Icons & Actions -->
@@ -136,10 +164,24 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-200 bg-white py-6">
-        <div class="max-w-7xl mx-auto px-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'ShopEase') }}. Built with Laravel & Tailwind CSS.</p>
-            <a href="{{ route('admin.products.index') }}" class="text-slate-400 hover:text-indigo-600 transition">Admin Portal &rarr;</a>
+    <footer class="mt-auto border-t border-slate-200 bg-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-100">SE</span>
+                    <span class="font-black text-slate-900 text-lg tracking-tight">Shop<span class="text-indigo-600">Ease</span></span>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500">
+                    <a href="{{ route('storefront.index') }}" class="hover:text-indigo-600 transition">Home</a>
+                    <a href="{{ route('storefront.products') }}" class="hover:text-indigo-600 transition">Shop</a>
+                    <a href="{{ route('storefront.about') }}" class="hover:text-indigo-600 transition">About Us</a>
+                    <a href="{{ route('storefront.contact') }}" class="hover:text-indigo-600 transition">Contact</a>
+                    <a href="{{ route('admin.products.index') }}" class="text-slate-400 hover:text-indigo-600 transition">Admin Portal &rarr;</a>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+                <p>&copy; {{ date('Y') }} {{ config('app.name', 'ShopEase') }}. All rights reserved. Built with pride for Bangladesh.</p>
+            </div>
         </div>
     </footer>
 
