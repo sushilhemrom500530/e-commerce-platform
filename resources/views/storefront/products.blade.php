@@ -3,7 +3,7 @@
 @section('title', ($selectedCategory ? $selectedCategory->name . ' - ' : '') . 'All Products - ' . config('app.name', 'ShopEase'))
 
 @section('content')
-<div class="space-y-6">
+<div id="products-catalog-wrapper" class="space-y-6 transition-opacity duration-200">
     <!-- Top Header & Breadcrumbs Area (Matches User Design) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
         <div>
@@ -14,7 +14,7 @@
                 <a href="{{ route('storefront.index') }}" class="hover:text-indigo-600 transition">Home</a>
                 <span class="text-slate-400">&rsaquo;</span>
                 @if($selectedCategory)
-                    <a href="{{ route('storefront.products') }}" class="hover:text-indigo-600 transition">Products</a>
+                    <a href="{{ route('storefront.products') }}" onclick="event.preventDefault(); loadCatalog(this.href);" class="hover:text-indigo-600 transition">Products</a>
                     <span class="text-slate-400">&rsaquo;</span>
                     <span class="text-slate-800 font-bold">{{ $selectedCategory->name }}</span>
                 @else
@@ -26,15 +26,18 @@
         <!-- Sort By Dropdown (Matches User Design) -->
         <div class="flex items-center gap-2 self-start sm:self-auto">
             <span class="text-xs font-bold text-slate-600">Sort by:</span>
-            <form action="{{ route('storefront.products') }}" method="GET" id="catalog-sort-form">
+            <form action="{{ route('storefront.products') }}" method="GET" id="catalog-sort-form" onsubmit="event.preventDefault();">
                 @if(request('category'))
                     <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
+                @if(request('subcategory'))
+                    <input type="hidden" name="subcategory" value="{{ request('subcategory') }}">
                 @endif
                 @if(request('search'))
                     <input type="hidden" name="search" value="{{ request('search') }}">
                 @endif
                 <div class="relative">
-                    <select name="sort" onchange="document.getElementById('catalog-sort-form').submit()" 
+                    <select name="sort" onchange="handleSortChange(this)" 
                             class="appearance-none pl-3.5 pr-8 py-2 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-800 shadow-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer">
                         <option value="newest" {{ $sort === 'newest' ? 'selected' : '' }}>Newest First</option>
                         <option value="price_asc" {{ $sort === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -86,10 +89,14 @@
                             <span class="text-[11px] font-semibold text-slate-400">Filter:</span>
                             <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold truncate border border-indigo-100">
                                 {{ $selectedCategory->name }}
+                                @if(isset($selectedSubcategory) && $selectedSubcategory)
+                                    &rsaquo; {{ $selectedSubcategory->name }}
+                                @endif
                             </span>
                         </div>
                         <a href="{{ route('storefront.products', array_filter(['sort' => request('sort'), 'search' => request('search')])) }}" 
-                           class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline shrink-0">
+                           onclick="event.preventDefault(); loadCatalog(this.href);"
+                           class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline shrink-0 cursor-pointer">
                             <span>Clear</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                         </a>
@@ -100,6 +107,7 @@
                 <div id="category-dropdown-content" class="hidden border-t border-slate-100 p-4 sm:p-5 pt-3 transition-all duration-300 space-y-1">
                     <!-- All Categories Link -->
                     <a href="{{ route('storefront.products', array_filter(['sort' => request('sort'), 'search' => request('search')])) }}" 
+                       onclick="event.preventDefault(); loadCatalog(this.href);"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition group {{ !$selectedCategory ? 'bg-indigo-50/80 text-indigo-700 font-extrabold' : 'text-slate-700 hover:bg-slate-50 hover:text-indigo-600' }}">
                         <div class="flex items-center gap-2.5">
                             <span class="w-6 h-6 rounded-lg {{ !$selectedCategory ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500 group-hover:text-indigo-600' }} flex items-center justify-center transition">
@@ -119,6 +127,7 @@
                         <div class="space-y-1">
                             <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition group {{ $isActive ? 'bg-indigo-50/80 text-indigo-700 font-extrabold' : 'text-slate-700 hover:bg-slate-50 hover:text-indigo-600' }}">
                                 <a href="{{ route('storefront.products', array_filter(['category' => $category->slug, 'sort' => request('sort'), 'search' => request('search')])) }}" 
+                                   onclick="event.preventDefault(); loadCatalog(this.href);"
                                    class="flex-1 flex items-center gap-2.5">
                                     <span class="w-6 h-6 rounded-lg {{ $isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500 group-hover:text-indigo-600' }} flex items-center justify-center transition shrink-0">
                                         @if(stripos($category->name, 'electr') !== false)
@@ -149,6 +158,7 @@
                                     </button>
                                 @else
                                     <a href="{{ route('storefront.products', array_filter(['category' => $category->slug, 'sort' => request('sort'), 'search' => request('search')])) }}" 
+                                       onclick="event.preventDefault(); loadCatalog(this.href);"
                                        class="text-slate-400 group-hover:text-indigo-600 transition font-bold">
                                         &rsaquo;
                                     </a>
@@ -162,6 +172,7 @@
                                             $isSubActive = request('subcategory') === $sub->slug || request('subcategory') == $sub->id;
                                         @endphp
                                         <a href="{{ route('storefront.products', array_filter(['category' => $category->slug, 'subcategory' => $sub->slug, 'sort' => request('sort'), 'search' => request('search')])) }}"
+                                           onclick="event.preventDefault(); loadCatalog(this.href);"
                                            class="block px-2.5 py-1.5 rounded-lg text-xs font-semibold transition {{ $isSubActive ? 'bg-indigo-100/70 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-indigo-600' }}">
                                             • {{ $sub->name }}
                                         </a>
@@ -179,7 +190,9 @@
             @if($products->isEmpty())
                 <div class="bg-white rounded-2xl border border-slate-100 p-12 text-center space-y-3">
                     <p class="text-sm font-bold text-slate-800">No products found in this category.</p>
-                    <a href="{{ route('storefront.products') }}" class="inline-flex px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition">
+                    <a href="{{ route('storefront.products') }}" 
+                       onclick="event.preventDefault(); loadCatalog(this.href);"
+                       class="inline-flex px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition">
                         Show All Products
                     </a>
                 </div>
@@ -271,6 +284,114 @@
             if (arrowSvg) arrowSvg.classList.remove('rotate-90');
         }
     }
+
+    let isCatalogLoading = false;
+
+    window.loadCatalog = async function(url, pushState = true) {
+        if (isCatalogLoading) return;
+        const wrapper = document.getElementById('products-catalog-wrapper');
+        if (!wrapper) {
+            window.location.href = url;
+            return;
+        }
+
+        const prevAccordion = document.getElementById('category-dropdown-content');
+        const wasAccordionOpen = prevAccordion && !prevAccordion.classList.contains('hidden');
+        const openSubIds = Array.from(document.querySelectorAll('[id^="subs-"]:not(.hidden)')).map(el => el.id);
+
+        try {
+            isCatalogLoading = true;
+            wrapper.classList.add('opacity-40', 'pointer-events-none');
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            });
+
+            if (!response.ok) {
+                window.location.href = url;
+                return;
+            }
+
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            const newWrapper = doc.getElementById('products-catalog-wrapper');
+
+            if (!newWrapper) {
+                window.location.href = url;
+                return;
+            }
+
+            if (doc.title) {
+                document.title = doc.title;
+            }
+
+            wrapper.innerHTML = newWrapper.innerHTML;
+
+            // Restore category accordion state if it was open
+            if (wasAccordionOpen) {
+                const newContent = document.getElementById('category-dropdown-content');
+                const newArrow = document.getElementById('category-accordion-arrow');
+                const newBtn = document.getElementById('category-accordion-btn');
+                if (newContent) newContent.classList.remove('hidden');
+                if (newArrow) {
+                    newArrow.classList.add('rotate-180', 'bg-indigo-600', 'text-white');
+                    newArrow.classList.remove('bg-slate-100', 'text-slate-500');
+                }
+                if (newBtn) newBtn.setAttribute('aria-expanded', 'true');
+            }
+
+            // Restore open subcategory accordions
+            openSubIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.remove('hidden');
+                    const toggleBtn = el.previousElementSibling?.querySelector('button svg');
+                    if (toggleBtn) toggleBtn.classList.add('rotate-90');
+                }
+            });
+
+            if (pushState) {
+                window.history.pushState({ catalogUrl: url }, '', url);
+            }
+
+            const rect = wrapper.getBoundingClientRect();
+            if (rect.top < 0) {
+                wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (err) {
+            console.error('Catalog load failed:', err);
+            window.location.href = url;
+        } finally {
+            wrapper.classList.remove('opacity-40', 'pointer-events-none');
+            isCatalogLoading = false;
+        }
+    };
+
+    window.handleSortChange = function(selectEl) {
+        const sortVal = selectEl.value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('sort', sortVal);
+        currentUrl.searchParams.delete('page');
+        window.loadCatalog(currentUrl.toString());
+    };
+
+    window.addEventListener('popstate', function() {
+        if (document.getElementById('products-catalog-wrapper')) {
+            window.loadCatalog(window.location.href, false);
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('#products-catalog-wrapper nav[role="navigation"] a, #products-catalog-wrapper .pagination a');
+        if (paginationLink && paginationLink.href) {
+            e.preventDefault();
+            window.loadCatalog(paginationLink.href);
+        }
+    });
 </script>
 @endpush
 @endsection
