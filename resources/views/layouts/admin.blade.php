@@ -26,7 +26,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="h-full antialiased text-slate-800 bg-[#F3F5FA] flex flex-col lg:flex-row">
+<body class="min-h-screen antialiased text-slate-800 bg-[#F3F5FA]">
 
     <!-- Mobile Top Navigation Bar -->
     <header class="lg:hidden bg-[#131427] text-white p-4 flex items-center justify-between sticky top-0 z-50 border-b border-slate-800">
@@ -36,13 +36,22 @@
             </span>
             <span>ShopEase</span>
         </a>
-        <button type="button" onclick="document.getElementById('admin-sidebar').classList.toggle('-translate-x-full')" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
+        <button type="button" 
+                onclick="document.getElementById('admin-sidebar').classList.toggle('-translate-x-full'); document.getElementById('admin-sidebar-backdrop').classList.toggle('hidden');" 
+                class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
+                aria-label="Toggle Navigation">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
     </header>
 
-    <!-- Sidebar: Dark Navigation (Matches Exact Image Style) -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-[#131427] text-slate-300 flex flex-col justify-between p-5 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out lg:static lg:h-screen lg:sticky lg:top-0">
+    <!-- Mobile Backdrop -->
+    <div id="admin-sidebar-backdrop" 
+         onclick="document.getElementById('admin-sidebar').classList.add('-translate-x-full'); this.classList.add('hidden');" 
+         class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- Sidebar: 100% Fixed Position on Desktop (Never scrolls with document) -->
+    <aside id="admin-sidebar" 
+           class="fixed inset-y-0 left-0 z-40 w-64 h-screen bg-[#131427] text-slate-300 flex flex-col justify-between p-5 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out overflow-y-auto">
         <div class="space-y-6">
             <!-- Brand Header -->
             <div class="flex items-center justify-between px-2 pt-2">
@@ -137,8 +146,8 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+    <!-- Main Content Area: Offset by lg:pl-64 so it flows beside the fixed sidebar -->
+    <div class="lg:pl-64 flex flex-col min-w-0 min-h-screen">
         <!-- Topbar -->
         <header class="bg-white border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
             <!-- Search Input -->
@@ -210,3 +219,4 @@
     </div>
 </body>
 </html>
+
