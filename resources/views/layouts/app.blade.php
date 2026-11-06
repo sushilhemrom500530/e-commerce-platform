@@ -92,11 +92,22 @@
                             </span>
                         </form>
 
-                        <!-- Cart Icon with Badge (From Design) -->
-                        <div class="relative cursor-pointer text-slate-700 hover:text-indigo-600 transition p-1" title="Shopping Cart">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                            <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">3</span>
-                        </div>
+                        <!-- Cart Icon with Dynamic Real-Time Badge -->
+                        @php
+                            $cartCount = array_sum(array_column(session('cart', []), 'quantity'));
+                        @endphp
+                        <a href="{{ route('cart.index') }}" 
+                           id="navbar-cart-btn" 
+                           class="relative p-1 text-slate-700 hover:text-indigo-600 transition cursor-pointer group" 
+                           title="Shopping Cart">
+                            <svg class="w-6 h-6 transition group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span id="navbar-cart-badge" 
+                                  class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black min-w-4 h-4 px-1 rounded-full flex items-center justify-center shadow-xs transition-transform duration-200 {{ $cartCount > 0 ? '' : 'hidden' }}">
+                                {{ $cartCount }}
+                            </span>
+                        </a>
 
                         <!-- User Authentication Status: Login Button OR User Avatar with Hover Dropdown -->
                         @guest
@@ -243,6 +254,18 @@
                     <a href="{{ route('storefront.products') }}" 
                        class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.products') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Shop</span>
+                        <span class="text-xs text-slate-400">&rsaquo;</span>
+                    </a>
+
+                    <!-- Cart -->
+                    <a href="{{ route('cart.index') }}" 
+                       class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('cart.index') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
+                        <div class="flex items-center gap-2">
+                            <span>Shopping Cart</span>
+                            <span id="mobile-drawer-cart-badge" class="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black {{ $cartCount > 0 ? '' : 'hidden' }}">
+                                {{ $cartCount }}
+                            </span>
+                        </div>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
                     </a>
 
@@ -404,15 +427,58 @@
             }, { passive: true });
         });
 
+        window.addToCart = function(productId, productName, price, imageUrl, slug) {
+            const badge = document.getElementById('navbar-cart-badge');
+            const drawerBadge = document.getElementById('mobile-drawer-cart-badge');
+            let current = badge ? parseInt(badge.textContent.trim() || '0', 10) : 0;
+            if (isNaN(current)) current = 0;
+            current += 1;
+
+            if (badge) {
+                badge.textContent = current;
+                badge.classList.remove('hidden');
+                badge.classList.add('scale-125');
+                setTimeout(() => badge.classList.remove('scale-125'), 250);
+            }
+            if (drawerBadge) {
+                drawerBadge.textContent = current;
+                drawerBadge.classList.remove('hidden');
+            }
+
+            if (window.showToast) {
+                window.showToast(`"${productName}" added to cart!`, 'success');
+            }
+
+            fetch('{{ route("cart.add") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId, quantity: 1 })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.total_count !== undefined) {
+                    if (badge) {
+                        badge.textContent = data.total_count;
+                        if (data.total_count > 0) badge.classList.remove('hidden');
+                        else badge.classList.add('hidden');
+                    }
+                    if (drawerBadge) {
+                        drawerBadge.textContent = data.total_count;
+                        if (data.total_count > 0) drawerBadge.classList.remove('hidden');
+                        else drawerBadge.classList.add('hidden');
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+        };
+
         window.showAddToCartToast = function(productName) {
-            const toast = document.getElementById('cart-toast');
-            const toastTitle = document.getElementById('cart-toast-title');
-            if (toast && toastTitle) {
-                toastTitle.textContent = productName + ' added to cart!';
-                toast.classList.remove('translate-y-24', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-24', 'opacity-0');
-                }, 2500);
+            if (window.showToast) {
+                window.showToast(`"${productName}" added to cart!`, 'success');
             }
         };
 

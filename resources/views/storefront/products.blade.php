@@ -222,7 +222,7 @@
 
                                 <!-- Add to Cart Action Button -->
                                 <button type="button" 
-                                        onclick="window.showAddToCartToast('{{ addslashes($product->name) }}')"
+                                        onclick="window.addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ (float) $product->new_price }}, '{{ addslashes($product->image_url) }}', '{{ $product->slug }}')"
                                         class="w-full mt-3 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#5046E5] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white text-xs font-bold shadow-md shadow-indigo-100 transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
                                     <span>Add to Cart</span>
                                 </button>

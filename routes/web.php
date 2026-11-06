@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
@@ -19,6 +20,14 @@ Route::get('/product/{product:slug}', [StorefrontController::class, 'show'])->na
 Route::get('/about', [StorefrontController::class, 'about'])->name('storefront.about');
 Route::get('/contact', [StorefrontController::class, 'contact'])->name('storefront.contact');
 Route::post('/contact', [StorefrontController::class, 'submitContact'])->name('storefront.contact.submit');
+
+// Shopping Cart & Checkout
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
+Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
 // Web Authentication & User Profile
 Route::middleware('guest')->group(function () {

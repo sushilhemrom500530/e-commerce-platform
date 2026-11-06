@@ -244,7 +244,7 @@
 
                                 <div class="pt-2 flex items-center gap-2">
                                     <button type="button" 
-                                            onclick="window.showAddToCartToast('{{ addslashes($product->name) }}')"
+                                            onclick="window.addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ (float) $product->new_price }}, '{{ addslashes($product->image_url) }}', '{{ $product->slug }}')"
                                             class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs hover:shadow flex items-center justify-center gap-1.5 cursor-pointer">
                                         <span>Add to Cart</span>
                                     </button>

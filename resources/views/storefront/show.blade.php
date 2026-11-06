@@ -100,15 +100,17 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div class="pt-4 flex items-center gap-4">
+                <!-- Action Buttons -->
+                <div class="pt-4 flex flex-wrap items-center gap-3">
+                    <button type="button" 
+                            onclick="window.addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ (float) $product->new_price }}, '{{ addslashes($product->image_url) }}', '{{ $product->slug }}')"
+                            class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md shadow-indigo-100 transition active:scale-95 inline-flex items-center gap-2 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span>Add to Cart</span>
+                    </button>
                     <a href="{{ route('storefront.index') }}" class="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-100 transition inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        <span>Back to Catalog</span>
-                    </a>
-                    <a href="{{ route('admin.products.edit', $product) }}" class="px-5 py-3 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition shadow-sm inline-flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        <span>Edit Product (Admin)</span>
+                        <span>Catalog</span>
                     </a>
                 </div>
             </div>
