@@ -32,7 +32,7 @@
             <p class="text-xs text-slate-500 max-w-sm mx-auto">Explore our collection of authentic products and find what you need today.</p>
         </div>
         <div class="pt-2">
-            <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-100 transition active:scale-95">
+            <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#5945F7] hover:bg-[#4a36e2] text-white text-xs font-bold shadow-md shadow-[#5945F7]/25 transition active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
                 <span>Browse All Products</span>
             </a>
@@ -155,7 +155,7 @@
                 <form action="{{ route('cart.checkout') }}" method="POST" class="pt-2">
                     @csrf
                     <button type="submit" 
-                            class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-indigo-200 transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+                            class="w-full py-3.5 px-5 rounded-2xl bg-[#5945F7] hover:bg-[#4a36e2] text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-[#5945F7]/30 transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         <span>Place Order Now</span>
                     </button>
