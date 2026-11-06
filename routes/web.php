@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\WebAuthController;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\Route;
 // Public Storefront
 Route::get('/', [StorefrontController::class, 'index'])->name('storefront.index');
 Route::get('/product/{product:slug}', [StorefrontController::class, 'show'])->name('storefront.product');
+
+// Web Authentication
+Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [WebAuthController::class, 'login'])->name('login.post');
+Route::get('/register', [WebAuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [WebAuthController::class, 'register'])->name('register.post');
+Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 
 // Server Health Route
 Route::get('/health', function (): JsonResponse {

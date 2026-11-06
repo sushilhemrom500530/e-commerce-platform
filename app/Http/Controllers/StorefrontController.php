@@ -16,9 +16,22 @@ class StorefrontController extends Controller
      */
     public function index(Request $request): View|JsonResponse
     {
+        $search = $request->input('search');
+
         $subcategories = Subcategory::where('is_active', true)
-            ->whereHas('products', fn ($q) => $q->where('is_active', true))
-            ->with(['category', 'products' => fn ($q) => $q->where('is_active', true)->latest()])
+            ->whereHas('products', function ($q) use ($search) {
+                $q->where('is_active', true);
+                if ($search) {
+                    $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%"));
+                }
+            })
+            ->with(['category', 'products' => function ($q) use ($search) {
+                $q->where('is_active', true);
+                if ($search) {
+                    $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%"));
+                }
+                $q->latest();
+            }])
             ->orderBy('name')
             ->get();
 
@@ -28,7 +41,7 @@ class StorefrontController extends Controller
             return $this->sendResponse($subcategories, 'Catalog retrieved successfully.');
         }
 
-        return view('storefront.index', compact('subcategories', 'categories'));
+        return view('storefront.index', compact('subcategories', 'categories', 'search'));
     }
 
     /**

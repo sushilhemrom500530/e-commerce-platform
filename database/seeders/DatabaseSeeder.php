@@ -16,7 +16,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Seed primary admin from environment variables if configured
+        // 1. Seed default Admin and Customer accounts
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Store Admin',
+                'password' => Hash::make('Admin@123456'),
+                'role' => 'admin',
+                'status' => 'active',
+                'is_verified' => true,
+                'is_deleted' => false,
+                'is_profile_completed' => true,
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'name' => 'John Customer',
+                'password' => Hash::make('Customer@123456'),
+                'role' => 'client',
+                'status' => 'active',
+                'is_verified' => true,
+                'is_deleted' => false,
+                'is_profile_completed' => true,
+            ]
+        );
+
         $adminEmail = env('ADMIN_EMAIL_ONE', 'admin@Practice Backend api.com');
         $adminPassword = env('ADMIN_PASSWORD_ONE', 'Admin@123456');
 
