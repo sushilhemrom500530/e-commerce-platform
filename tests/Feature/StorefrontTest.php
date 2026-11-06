@@ -61,4 +61,21 @@ class StorefrontTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_storefront_displays_shopease_header_hero_banner_and_top_categories(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('ShopEase');
+        $response->assertSee('Smart Shopping');
+        $response->assertSee('Better Living');
+        $response->assertSee('Fast Delivery');
+        $response->assertSee('Secure Payment');
+        $response->assertSee('Top Categories');
+        $response->assertSee('Laptops');
+        $response->assertSee('Mobiles');
+        $response->assertSee('Watches');
+        $response->assertSee('Fashion');
+    }
 }
