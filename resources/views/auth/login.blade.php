@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Sign In - ShopEase')
+
 @section('content')
 <div class="max-w-md mx-auto py-8 sm:py-12">
     <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/60 p-6 sm:p-10">

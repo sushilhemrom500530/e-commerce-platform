@@ -88,4 +88,3 @@ class FileUploadService
         return self::upload($newFile, $folder);
     }
 }
-

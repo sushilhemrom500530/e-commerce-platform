@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('title', $product->name . ' - ' . ($product->category ? $product->category->name . ' - ' : '') . config('app.name', 'ShopEase'))
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description), 155))
+@section('meta_image', $product->image_url)
+@section('og_type', 'product')
+
 @section('content')
 <div class="space-y-10">
     <!-- Breadcrumbs -->

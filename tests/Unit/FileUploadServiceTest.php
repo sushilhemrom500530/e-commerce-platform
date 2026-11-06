@@ -77,4 +77,3 @@ class FileUploadServiceTest extends TestCase
         Storage::disk('public')->assertExists($newPath);
     }
 }
-

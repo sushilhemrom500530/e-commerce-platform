@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', config('app.name', 'ShopEase') . ' - Smart Shopping, Better Living')
+@section('meta_description', 'Discover top electronics, fashion, home essentials, and gadgets at ShopEase. Authentic products, instant delivery, and verified warranty across Bangladesh.')
+
 @section('content')
 <div class="space-y-12">
     <!-- Hero Banner (100% Real Responsive HTML/CSS with Exact Design Match) -->
@@ -21,7 +24,7 @@
                 Discover amazing products with<br class="hidden sm:inline"> best prices and fast delivery.
             </p>
             <div class="pt-2">
-                <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#5945F7] hover:bg-[#4C37E8] text-white font-bold text-sm shadow-lg shadow-indigo-400/30 transition hover:scale-105 duration-200">
+                <a href="{{ route('storefront.products') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#5945F7] hover:bg-[#4C37E8] text-white font-bold text-sm shadow-lg shadow-indigo-400/30 transition hover:scale-100 duration-200">
                     <span>Shop Now</span>
                     <span class="text-base font-bold">→</span>
                 </a>

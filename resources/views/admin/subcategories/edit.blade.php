@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Edit Subcategory - ShopEase Admin')
+
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
     <div class="flex items-center justify-between">

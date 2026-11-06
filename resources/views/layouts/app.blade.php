@@ -3,7 +3,33 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? config('app.name', 'E-Commerce Platform') }}</title>
+    <title>@yield('title', $title ?? config('app.name', 'ShopEase') . ' - Smart Shopping, Better Living')</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="@yield('meta_description', 'Discover top electronics, fashion, home essentials, and gadgets at ShopEase. Authentic products, instant delivery, and verified warranty across Bangladesh.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'ShopEase, online shopping, ecommerce bangladesh, smartphones, laptops, electronics, fashion, gadgets, authentic products')">
+    <meta name="author" content="ShopEase Bangladesh">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:title" content="@yield('title', config('app.name', 'ShopEase') . ' - Smart Shopping, Better Living')">
+    <meta property="og:description" content="@yield('meta_description', 'Discover top electronics, fashion, home essentials, and gadgets at ShopEase. Authentic products, instant delivery, and verified warranty across Bangladesh.')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="ShopEase">
+    <meta property="og:image" content="@yield('meta_image', asset('images/hero-airpods-blend.png'))">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', config('app.name', 'ShopEase') . ' - Smart Shopping, Better Living')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Discover top electronics, fashion, home essentials, and gadgets at ShopEase. Authentic products, instant delivery, and verified warranty across Bangladesh.')">
+    <meta name="twitter:image" content="@yield('meta_image', asset('images/hero-airpods-blend.png'))">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

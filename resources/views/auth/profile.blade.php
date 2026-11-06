@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'My Profile - ShopEase')
+
 @section('content')
 <div class="max-w-4xl mx-auto space-y-8 py-6">
     <!-- Profile Hero Card -->

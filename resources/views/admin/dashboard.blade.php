@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Dashboard - ShopEase')
+
 @section('content')
 <div class="space-y-6 max-w-7xl">
     <!-- Header -->

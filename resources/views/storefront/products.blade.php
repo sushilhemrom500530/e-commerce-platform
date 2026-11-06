@@ -251,6 +251,34 @@
 
 @push('scripts')
 <script>
+    function initCategoryAccordion() {
+        const content = document.getElementById('category-dropdown-content');
+        const arrow = document.getElementById('category-accordion-arrow');
+        const btn = document.getElementById('category-accordion-btn');
+        if (!content || !arrow) return;
+
+        if (window.innerWidth >= 1024) {
+            // Desktop (lg+): Shown by default, user can collapse or expand
+            content.classList.remove('hidden');
+            arrow.classList.add('rotate-180', 'bg-indigo-600', 'text-white');
+            arrow.classList.remove('bg-slate-100', 'text-slate-500');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+        } else {
+            // Small devices: Collapsed by default (current responsive behavior)
+            content.classList.add('hidden');
+            arrow.classList.remove('rotate-180', 'bg-indigo-600', 'text-white');
+            arrow.classList.add('bg-slate-100', 'text-slate-500');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    // Initialize immediately on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCategoryAccordion);
+    } else {
+        initCategoryAccordion();
+    }
+
     function toggleCategoryMenu() {
         const content = document.getElementById('category-dropdown-content');
         const arrow = document.getElementById('category-accordion-arrow');
@@ -296,7 +324,7 @@
         }
 
         const prevAccordion = document.getElementById('category-dropdown-content');
-        const wasAccordionOpen = prevAccordion && !prevAccordion.classList.contains('hidden');
+        const wasAccordionOpen = prevAccordion ? !prevAccordion.classList.contains('hidden') : (window.innerWidth >= 1024);
         const openSubIds = Array.from(document.querySelectorAll('[id^="subs-"]:not(.hidden)')).map(el => el.id);
 
         try {
@@ -331,17 +359,24 @@
 
             wrapper.innerHTML = newWrapper.innerHTML;
 
-            // Restore category accordion state if it was open
+            // Restore category accordion state matching current view
+            const newContent = document.getElementById('category-dropdown-content');
+            const newArrow = document.getElementById('category-accordion-arrow');
+            const newBtn = document.getElementById('category-accordion-btn');
             if (wasAccordionOpen) {
-                const newContent = document.getElementById('category-dropdown-content');
-                const newArrow = document.getElementById('category-accordion-arrow');
-                const newBtn = document.getElementById('category-accordion-btn');
                 if (newContent) newContent.classList.remove('hidden');
                 if (newArrow) {
                     newArrow.classList.add('rotate-180', 'bg-indigo-600', 'text-white');
                     newArrow.classList.remove('bg-slate-100', 'text-slate-500');
                 }
                 if (newBtn) newBtn.setAttribute('aria-expanded', 'true');
+            } else {
+                if (newContent) newContent.classList.add('hidden');
+                if (newArrow) {
+                    newArrow.classList.remove('rotate-180', 'bg-indigo-600', 'text-white');
+                    newArrow.classList.add('bg-slate-100', 'text-slate-500');
+                }
+                if (newBtn) newBtn.setAttribute('aria-expanded', 'false');
             }
 
             // Restore open subcategory accordions
