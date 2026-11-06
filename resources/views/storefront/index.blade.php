@@ -2,25 +2,31 @@
 
 @section('content')
 <div class="space-y-12">
-    <!-- Hero Banner (ShopEase Style matching Reference Image) -->
-    <div class="relative w-full rounded-3xl sm:rounded-[2.5rem] overflow-hidden shadow-xs border border-purple-100/50 bg-[#DDD6FB]">
-        <!-- Screen-reader and SEO Accessibility Content -->
-        <div class="sr-only">
-            <h1>Smart Shopping Better Living</h1>
-            <p>Discover amazing products with best prices and fast delivery.</p>
-            <a href="#products-catalog">Shop Now</a>
+    <!-- Hero Banner (100% Real Responsive HTML/CSS with Exact Design Match) -->
+    <div class="relative rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-r from-[#DFD7FE] via-[#DDD4FE] to-[#D5C9FC] overflow-hidden border border-purple-100/60 shadow-xs min-h-[380px] sm:min-h-[460px] flex items-center">
+        <!-- Exact 3D AirPods Graphic on Right -->
+        <div class="absolute right-0 top-0 bottom-0 w-full md:w-3/5 lg:w-1/2 flex items-center justify-end pointer-events-none">
+            <img src="{{ asset('images/hero-airpods-blend.png') }}" 
+                 alt="3D Wireless Earbuds in Charging Case" 
+                 class="h-full w-auto object-cover object-left md:object-right select-none opacity-90 sm:opacity-100">
         </div>
 
-        <!-- Exact High-Resolution Banner Graphic from Reference Design -->
-        <img src="{{ asset('images/shopease-banner-2x.jpg') }}" 
-             alt="Smart Shopping Better Living - ShopEase" 
-             class="w-full h-auto object-cover block select-none">
-
-        <!-- Interactive Clickable Hotspot over "Shop Now →" Button -->
-        <a href="#products-catalog" 
-           class="absolute left-[4.5%] bottom-[13%] w-[19%] h-[16%] min-w-[130px] rounded-2xl cursor-pointer transition hover:ring-4 hover:ring-indigo-300/50 active:scale-95" 
-           title="Shop Now">
-        </a>
+        <!-- Left Content: Real Semantic HTML & Tailwind CSS -->
+        <div class="relative z-10 py-12 sm:py-20 px-6 sm:px-14 max-w-xl space-y-6">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-[#17114A] tracking-tight leading-[1.08]">
+                Smart Shopping<br>
+                <span>Better Living</span>
+            </h1>
+            <p class="text-[#4E477E] text-sm sm:text-base font-medium max-w-md leading-relaxed">
+                Discover amazing products with<br class="hidden sm:inline"> best prices and fast delivery.
+            </p>
+            <div class="pt-2">
+                <a href="#products-catalog" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#5945F7] hover:bg-[#4C37E8] text-white font-bold text-sm shadow-lg shadow-indigo-400/30 transition hover:scale-105 duration-200">
+                    <span>Shop Now</span>
+                    <span class="text-base font-bold">→</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Trust Badges Strip (Reference Image Match) -->
