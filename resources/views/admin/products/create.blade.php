@@ -76,12 +76,36 @@
             @error('description')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
         </div>
 
-        <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Product Image *</label>
-            <input type="file" id="image_input" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+        <!-- 1. Product Thumbnail Image (Main Image) -->
+        <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">
+                    Product Thumbnail * <span class="text-indigo-600 font-semibold normal-case">(Main Display Image)</span>
+                </label>
+                <p class="text-[11px] text-slate-500 mb-2">This is the primary image shown in catalog lists, category cards, and shopping feeds.</p>
+                <input type="file" id="image_input" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition border border-slate-200 rounded-xl p-1 bg-white" required>
+            </div>
             @error('image')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
-            <div id="image_preview_box" class="mt-3 hidden">
-                <img id="image_preview" src="" class="w-24 h-24 rounded-xl object-cover border border-slate-200">
+            @error('thumbnail')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            <div id="image_preview_box" class="hidden">
+                <p class="text-[11px] font-bold text-slate-600 mb-1">Thumbnail Preview:</p>
+                <img id="image_preview" src="" class="w-24 h-24 rounded-2xl object-cover border border-slate-200 shadow-xs">
+            </div>
+        </div>
+
+        <!-- 2. Featured Images (Gallery Photos) -->
+        <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">
+                    Featured Images <span class="text-indigo-600 font-semibold normal-case">(Product Gallery & Features)</span>
+                </label>
+                <p class="text-[11px] text-slate-500 mb-2">Upload multiple angles, close-up details, or color variant photos (select one or multiple files).</p>
+                <input type="file" id="featured_images_input" name="featured_images[]" multiple accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-900 transition border border-slate-200 rounded-xl p-1 bg-white">
+            </div>
+            @error('featured_images')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            <div id="featured_preview_box" class="hidden">
+                <p class="text-[11px] font-bold text-slate-600 mb-1.5">Featured Gallery Previews:</p>
+                <div id="featured_previews" class="flex flex-wrap gap-2.5"></div>
             </div>
         </div>
 
@@ -151,6 +175,30 @@
                     previewBox.classList.remove('hidden');
                 }
                 reader.readAsDataURL(file);
+            }
+        });
+
+        // Featured Gallery Images Preview
+        const featuredInput = document.getElementById('featured_images_input');
+        const featuredBox = document.getElementById('featured_preview_box');
+        const featuredContainer = document.getElementById('featured_previews');
+
+        featuredInput.addEventListener('change', function() {
+            featuredContainer.innerHTML = '';
+            if (this.files && this.files.length > 0) {
+                featuredBox.classList.remove('hidden');
+                Array.from(this.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-2xs';
+                        featuredContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                featuredBox.classList.add('hidden');
             }
         });
     });

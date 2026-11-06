@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('slug')->unique()->index();
             $table->longText('description')->nullable();
             $table->string('image')->nullable();
+            $table->json('featured_images')->nullable();
             $table->decimal('old_price', 12, 2)->nullable();
             $table->decimal('new_price', 12, 2);
             $table->unsignedInteger('stock')->default(0);

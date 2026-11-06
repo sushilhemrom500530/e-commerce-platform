@@ -28,8 +28,15 @@
             <tbody class="divide-y divide-slate-100 font-medium">
                 @forelse($subcategories as $subcategory)
                     <tr class="hover:bg-slate-50/60 transition">
-                        <td class="py-3.5 px-4 font-bold text-slate-900">
-                            {{ $subcategory->name }}
+                        <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-3">
+                            @if($subcategory->image)
+                                <img src="{{ $subcategory->image_url }}" alt="{{ $subcategory->name }}" class="w-8 h-8 rounded-lg object-cover border border-slate-200">
+                            @else
+                                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs border border-indigo-100">
+                                    {{ substr($subcategory->name, 0, 1) }}
+                                </span>
+                            @endif
+                            <span>{{ $subcategory->name }}</span>
                         </td>
                         <td class="py-3.5 px-4">
                             <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">

@@ -20,6 +20,7 @@ class SubcategoryRequest extends FormRequest
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255', Rule::unique('subcategories', 'name')->where('category_id', $this->category_id)->ignore($subcategoryId)],
             'description' => ['nullable', 'string', 'max:1000'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

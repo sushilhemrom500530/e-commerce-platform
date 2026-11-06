@@ -54,7 +54,14 @@
                                 <a href="{{ route('storefront.product', $product->slug) }}" class="hover:text-indigo-600 transition block truncate max-w-xs">
                                     {{ $product->name }}
                                 </a>
-                                <span class="font-mono text-[10px] text-slate-400 font-normal">/product/{{ $product->slug }}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono text-[10px] text-slate-400 font-normal">/product/{{ $product->slug }}</span>
+                                    @if(!empty($product->featured_images) && count($product->featured_images) > 0)
+                                        <span class="inline-flex items-center gap-0.5 text-[9px] font-black text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100">
+                                            +{{ count($product->featured_images) }} gallery
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </td>
                         <td class="py-3.5 px-4">

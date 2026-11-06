@@ -16,12 +16,35 @@
     <!-- Product Detail Container -->
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-10">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-            <!-- Product Image -->
-            <div class="relative rounded-2xl overflow-hidden bg-slate-100 aspect-square border border-slate-200/60 shadow-xs">
-                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
-                @if($product->discount_percentage)
-                    <div class="absolute top-4 left-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
-                        SAVE {{ $product->discount_percentage }}%
+            <!-- Product Image & Gallery -->
+            <div class="space-y-4">
+                <div class="relative rounded-2xl overflow-hidden bg-[#F8F9FD] aspect-square border border-slate-200/60 shadow-xs p-4 flex items-center justify-center">
+                    <img id="main-product-image" src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-full object-contain">
+                    @if($product->discount_percentage)
+                        <div class="absolute top-4 left-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
+                            SAVE {{ $product->discount_percentage }}%
+                        </div>
+                    @endif
+                </div>
+
+                @if(!empty($product->featured_images_urls) && count($product->featured_images_urls) > 0)
+                    <!-- Featured Images Gallery Thumbnails -->
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Featured Photos</p>
+                        <div class="flex items-center gap-2.5 overflow-x-auto pb-1">
+                            <button type="button" 
+                                    onclick="document.getElementById('main-product-image').src='{{ $product->image_url }}'"
+                                    class="w-16 h-16 rounded-xl border-2 border-indigo-600 overflow-hidden p-1 bg-[#F8F9FD] hover:opacity-90 transition flex-shrink-0 cursor-pointer">
+                                <img src="{{ $product->image_url }}" class="w-full h-full object-contain">
+                            </button>
+                            @foreach($product->featured_images_urls as $fImg)
+                                <button type="button" 
+                                        onclick="document.getElementById('main-product-image').src='{{ $fImg }}'"
+                                        class="w-16 h-16 rounded-xl border border-slate-200 hover:border-indigo-600 overflow-hidden p-1 bg-[#F8F9FD] hover:opacity-90 transition flex-shrink-0 cursor-pointer">
+                                    <img src="{{ $fImg }}" class="w-full h-full object-contain">
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
             </div>

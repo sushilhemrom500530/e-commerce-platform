@@ -26,8 +26,9 @@
         </div>
 
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Category Image</label>
-            <input type="file" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Category Icon / Image</label>
+            <input type="file" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition border border-slate-200 rounded-xl p-1">
+            <p class="text-[11px] text-slate-400 mt-1">Upload a category badge or icon (PNG, JPG, SVG, WebP up to 2MB).</p>
             @error('image')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
         </div>
 

@@ -113,4 +113,44 @@ class ProductCrudTest extends TestCase
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
         Storage::disk('public')->assertMissing('products/sample.jpg');
     }
+
+    public function test_can_create_product_with_thumbnail_and_featured_images_upload(): void
+    {
+        Storage::fake('public');
+
+        $category = Category::factory()->create();
+        $subcategory = Subcategory::factory()->create(['category_id' => $category->id]);
+
+        $thumbnail = UploadedFile::fake()->image('thumb.jpg', 600, 600);
+        $featuredOne = UploadedFile::fake()->image('featured_1.jpg', 800, 800);
+        $featuredTwo = UploadedFile::fake()->image('featured_2.jpg', 800, 800);
+
+        $response = $this->post('/admin/products', [
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
+            'name' => 'Sony Noise Canceling Headphones',
+            'description' => 'Flagship wireless headphones',
+            'old_price' => 22000,
+            'new_price' => 18000,
+            'stock' => 20,
+            'image' => $thumbnail,
+            'featured_images' => [$featuredOne, $featuredTwo],
+        ]);
+
+        $response->assertRedirect('/admin/products');
+        $this->assertDatabaseHas('products', [
+            'name' => 'Sony Noise Canceling Headphones',
+            'slug' => 'sony-noise-canceling-headphones',
+        ]);
+
+        $product = Product::where('slug', 'sony-noise-canceling-headphones')->first();
+        $this->assertNotNull($product->image);
+        Storage::disk('public')->assertExists($product->image);
+
+        $this->assertIsArray($product->featured_images);
+        $this->assertCount(2, $product->featured_images);
+        foreach ($product->featured_images as $fImg) {
+            Storage::disk('public')->assertExists($fImg);
+        }
+    }
 }

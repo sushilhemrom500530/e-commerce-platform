@@ -20,6 +20,7 @@ class Product extends Model
         'slug',
         'description',
         'image',
+        'featured_images',
         'old_price',
         'new_price',
         'stock',
@@ -29,6 +30,7 @@ class Product extends Model
     protected function casts(): array
     {
         return [
+            'featured_images' => 'array',
             'old_price' => 'decimal:2',
             'new_price' => 'decimal:2',
             'stock' => 'integer',
@@ -80,6 +82,25 @@ class Product extends Model
                 }
 
                 return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80';
+            }
+        );
+    }
+
+    protected function featuredImagesUrls(): Attribute
+    {
+        return Attribute::make(
+            get: function (): array {
+                if (empty($this->featured_images) || ! is_array($this->featured_images)) {
+                    return [];
+                }
+
+                return array_map(function ($img): string {
+                    if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
+                        return $img;
+                    }
+
+                    return Storage::disk('public')->url($img);
+                }, $this->featured_images);
             }
         );
     }

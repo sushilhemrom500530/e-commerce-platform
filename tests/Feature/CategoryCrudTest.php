@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Subcategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CategoryCrudTest extends TestCase
@@ -88,5 +90,28 @@ class CategoryCrudTest extends TestCase
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
         $this->assertDatabaseMissing('subcategories', ['id' => $subcategory->id]);
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
+    }
+
+    public function test_can_create_category_with_image_upload(): void
+    {
+        Storage::fake('public');
+
+        $image = UploadedFile::fake()->image('category_badge.png', 400, 400);
+
+        $response = $this->post('/admin/categories', [
+            'name' => 'Sports & Outdoors',
+            'description' => 'Fitness gear and sporting equipment',
+            'image' => $image,
+        ]);
+
+        $response->assertRedirect('/admin/categories');
+        $this->assertDatabaseHas('categories', [
+            'name' => 'Sports & Outdoors',
+            'slug' => 'sports-outdoors',
+        ]);
+
+        $category = Category::where('slug', 'sports-outdoors')->first();
+        $this->assertNotNull($category->image);
+        Storage::disk('public')->assertExists($category->image);
     }
 }

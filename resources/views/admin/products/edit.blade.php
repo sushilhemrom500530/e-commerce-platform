@@ -80,14 +80,43 @@
             @error('description')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
         </div>
 
-        <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Product Image</label>
-            <div class="mb-3 flex items-center gap-4">
-                <img id="current_image" src="{{ $product->image_url }}" class="w-20 h-20 rounded-xl object-cover border border-slate-200">
-                <span class="text-xs text-slate-400">Current active photo</span>
+        <!-- 1. Product Thumbnail Image (Main Display Image) -->
+        <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">
+                    Product Thumbnail <span class="text-indigo-600 font-semibold normal-case">(Main Display Image)</span>
+                </label>
+                <div class="mb-3 flex items-center gap-4">
+                    <img id="current_image" src="{{ $product->image_url }}" class="w-20 h-20 rounded-2xl object-cover border border-slate-200 shadow-xs">
+                    <span class="text-xs text-slate-400">Current active thumbnail photo</span>
+                </div>
+                <input type="file" id="image_input" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition border border-slate-200 rounded-xl p-1 bg-white">
+                <p class="text-[11px] text-slate-400 mt-1">Leave empty to keep the current thumbnail image.</p>
             </div>
-            <input type="file" id="image_input" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
             @error('image')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('thumbnail')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+        </div>
+
+        <!-- 2. Featured Images (Gallery Photos) -->
+        <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">
+                    Featured Images <span class="text-indigo-600 font-semibold normal-case">(Product Gallery & Features)</span>
+                </label>
+                @if(!empty($product->featured_images_urls) && count($product->featured_images_urls) > 0)
+                    <div class="mb-3">
+                        <p class="text-[11px] font-bold text-slate-600 mb-1.5">Current Featured Gallery Photos:</p>
+                        <div class="flex flex-wrap gap-2.5">
+                            @foreach($product->featured_images_urls as $fUrl)
+                                <img src="{{ $fUrl }}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-2xs">
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+                <p class="text-[11px] text-slate-500 mb-2">Upload additional photos to add/replace in the featured gallery.</p>
+                <input type="file" id="featured_images_input" name="featured_images[]" multiple accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-900 transition border border-slate-200 rounded-xl p-1 bg-white">
+            </div>
+            @error('featured_images')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-3">

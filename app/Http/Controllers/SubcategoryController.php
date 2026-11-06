@@ -37,6 +37,10 @@ class SubcategoryController extends Controller
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
 
+        if ($request->hasFile('image')) {
+            $data['image'] = FileUploadService::upload($request->file('image'), 'subcategories');
+        }
+
         $subcategory = Subcategory::create($data);
 
         if ($request->expectsJson()) {
@@ -58,6 +62,10 @@ class SubcategoryController extends Controller
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
 
+        if ($request->hasFile('image')) {
+            $data['image'] = FileUploadService::replace($subcategory->image, $request->file('image'), 'subcategories');
+        }
+
         $subcategory->update($data);
 
         if ($request->expectsJson()) {
@@ -72,6 +80,8 @@ class SubcategoryController extends Controller
         foreach ($subcategory->products as $product) {
             FileUploadService::delete($product->image);
         }
+
+        FileUploadService::delete($subcategory->image);
 
         $subcategory->delete();
 

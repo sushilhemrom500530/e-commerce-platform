@@ -49,8 +49,23 @@ class ProductController extends Controller
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
 
+        // 1. Thumbnail Image Upload
         if ($request->hasFile('image')) {
             $data['image'] = FileUploadService::upload($request->file('image'), 'products');
+        } elseif ($request->hasFile('thumbnail')) {
+            $data['image'] = FileUploadService::upload($request->file('thumbnail'), 'products');
+        }
+
+        // 2. Featured Images Upload (Gallery)
+        if ($request->hasFile('featured_images')) {
+            $featured = [];
+            $files = is_array($request->file('featured_images')) ? $request->file('featured_images') : [$request->file('featured_images')];
+            foreach ($files as $file) {
+                if ($file) {
+                    $featured[] = FileUploadService::upload($file, 'products/featured');
+                }
+            }
+            $data['featured_images'] = $featured;
         }
 
         $product = Product::create($data);
@@ -75,8 +90,23 @@ class ProductController extends Controller
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
 
+        // 1. Thumbnail Image Update
         if ($request->hasFile('image')) {
             $data['image'] = FileUploadService::replace($product->image, $request->file('image'), 'products');
+        } elseif ($request->hasFile('thumbnail')) {
+            $data['image'] = FileUploadService::replace($product->image, $request->file('thumbnail'), 'products');
+        }
+
+        // 2. Featured Images Upload / Append
+        if ($request->hasFile('featured_images')) {
+            $featured = is_array($product->featured_images) ? $product->featured_images : [];
+            $files = is_array($request->file('featured_images')) ? $request->file('featured_images') : [$request->file('featured_images')];
+            foreach ($files as $file) {
+                if ($file) {
+                    $featured[] = FileUploadService::upload($file, 'products/featured');
+                }
+            }
+            $data['featured_images'] = $featured;
         }
 
         $product->update($data);
@@ -91,6 +121,12 @@ class ProductController extends Controller
     public function destroy(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         FileUploadService::delete($product->image);
+
+        if (! empty($product->featured_images) && is_array($product->featured_images)) {
+            foreach ($product->featured_images as $fImg) {
+                FileUploadService::delete($fImg);
+            }
+        }
 
         $product->delete();
 
