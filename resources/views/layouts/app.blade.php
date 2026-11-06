@@ -47,9 +47,9 @@
             </div>
         </header>
     @else
-        <!-- ShopEase Storefront Floating Header (Matches User Design) -->
-        <header class="sticky top-3 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div class="bg-white/95 backdrop-blur rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm px-6 sm:px-8">
+        <!-- ShopEase Storefront Full-Width Header with Smart Scroll Animation -->
+        <header id="storefront-navbar" class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-slate-100 shadow-xs transition-transform duration-300 ease-in-out">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16 sm:h-20">
                     <!-- Brand Logo -->
                     <a href="{{ route('storefront.index') }}" class="flex items-center gap-2.5 text-slate-900 font-extrabold text-2xl tracking-tight">
@@ -142,6 +142,35 @@
             <a href="{{ route('admin.products.index') }}" class="text-slate-400 hover:text-indigo-600 transition">Admin Portal &rarr;</a>
         </div>
     </footer>
+
+    <!-- Smart Header: Hide on scroll down, smooth animated reveal on scroll up -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navbar = document.getElementById('storefront-navbar');
+            if (!navbar) return;
+
+            let lastScrollY = window.scrollY;
+            const threshold = 6;
+
+            window.addEventListener('scroll', function () {
+                const currentScrollY = window.scrollY;
+
+                if (Math.abs(currentScrollY - lastScrollY) < threshold) {
+                    return;
+                }
+
+                if (currentScrollY <= 20) {
+                    navbar.classList.remove('-translate-y-full');
+                } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    navbar.classList.add('-translate-y-full');
+                } else if (currentScrollY < lastScrollY) {
+                    navbar.classList.remove('-translate-y-full');
+                }
+
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
