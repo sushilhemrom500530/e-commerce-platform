@@ -44,9 +44,14 @@ class SubcategoryCrudTest extends TestCase
         $category = Category::factory()->create();
         $sub = Subcategory::factory()->create(['category_id' => $category->id, 'name' => 'Laptops']);
 
-        $response = $this->getJson("/admin/categories/{$category->slug}/subcategories");
+        $this->getJson("/admin/categories/{$category->id}/subcategories")
+            ->assertStatus(200)
+            ->assertJson([
+                ['id' => $sub->id, 'name' => 'Laptops'],
+            ]);
 
-        $response->assertStatus(200)
+        $this->getJson("/admin/categories/{$category->slug}/subcategories")
+            ->assertStatus(200)
             ->assertJson([
                 ['id' => $sub->id, 'name' => 'Laptops'],
             ]);

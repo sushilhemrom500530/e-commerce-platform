@@ -41,6 +41,13 @@ class Subcategory extends Model
         return 'slug';
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return is_numeric($value)
+            ? $this->where('id', $value)->first()
+            : $this->where($field ?? 'slug', $value)->first();
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

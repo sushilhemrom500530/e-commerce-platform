@@ -72,6 +72,10 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category): RedirectResponse|JsonResponse
     {
+        foreach ($category->products as $product) {
+            FileUploadService::delete($product->image);
+        }
+
         FileUploadService::delete($category->image);
 
         $category->delete();

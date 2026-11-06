@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SubcategoryRequest;
 use App\Models\Category;
 use App\Models\Subcategory;
+use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -68,6 +69,10 @@ class SubcategoryController extends Controller
 
     public function destroy(Request $request, Subcategory $subcategory): RedirectResponse|JsonResponse
     {
+        foreach ($subcategory->products as $product) {
+            FileUploadService::delete($product->image);
+        }
+
         $subcategory->delete();
 
         if ($request->expectsJson()) {

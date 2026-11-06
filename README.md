@@ -20,7 +20,7 @@ A production-grade, simplified E-Commerce Platform built with **Laravel 11/12/13
 * Add products with Category, Subcategory, Product Name, Description, Image Upload, Old Price, and New Price.
 * **Dynamic Dependent Dropdown:** Selecting a category instantly updates the subcategory dropdown via AJAX.
 * **Cross-Validation:** Backend rule prevents selecting a subcategory that does not belong to the selected category.
-* Automatic image handling with disk cleanup on update/delete.
+* **Cloudinary & Reusable Storage:** Automatic image upload to Cloudinary CDN with automatic cleanup on update/delete via `FileUploadService`.
 
 ### 4. Customer Storefront
 * **Product Catalog (`/`):** All products organized and grouped by their respective **Subcategories**.
@@ -35,8 +35,9 @@ A production-grade, simplified E-Commerce Platform built with **Laravel 11/12/13
 
 * **Framework:** Laravel 11/12/13 (PHP 8.3)
 * **Database:** PostgreSQL (with Eloquent ORM & cascade deletions)
+* **Cloud Storage:** Cloudinary CDN (with local fallback)
 * **Styling:** Tailwind CSS
-* **Testing:** PHPUnit (80 tests, 270 assertions, 100% passing)
+* **Testing:** PHPUnit (87 tests, 287 assertions, 100% passing)
 
 ---
 
@@ -100,4 +101,4 @@ Run the full PHPUnit test suite:
 ```bash
 php artisan test
 ```
-All 80 tests pass covering Unit, Feature, Authentication, Relationships, CRUD, and Storefront scenarios.
+All 87 tests pass covering Unit, Feature, Authentication, Relationships, CRUD, Cloudinary Storage, and Storefront scenarios.

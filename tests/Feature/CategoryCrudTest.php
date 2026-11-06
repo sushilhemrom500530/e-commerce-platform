@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\Subcategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -70,5 +72,21 @@ class CategoryCrudTest extends TestCase
 
         $response->assertRedirect('/admin/categories');
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
+
+    public function test_deleting_category_cascades_and_removes_related_subcategories_and_products(): void
+    {
+        $category = Category::factory()->create();
+        $subcategory = Subcategory::factory()->create(['category_id' => $category->id]);
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
+        ]);
+
+        $this->delete("/admin/categories/{$category->slug}")->assertRedirect('/admin/categories');
+
+        $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+        $this->assertDatabaseMissing('subcategories', ['id' => $subcategory->id]);
+        $this->assertDatabaseMissing('products', ['id' => $product->id]);
     }
 }
