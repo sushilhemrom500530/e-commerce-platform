@@ -192,3 +192,4 @@ class CartController extends Controller
         return redirect()->route('storefront.index')->with('success', "Order #{$orderNumber} placed successfully! Thank you for shopping with ShopEase.");
     }
 }
+

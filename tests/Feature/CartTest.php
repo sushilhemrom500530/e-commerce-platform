@@ -126,3 +126,4 @@ class CartTest extends TestCase
         $response->assertSessionHas('error');
     }
 }
+
