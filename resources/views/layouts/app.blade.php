@@ -70,6 +70,35 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             <span>View Storefront</span>
                         </a>
+
+                        @auth
+                            <div class="relative group">
+                                <button type="button" class="flex items-center p-0.5 rounded-full ring-2 ring-indigo-400/30 hover:ring-indigo-400 transition cursor-pointer" aria-label="Admin user menu">
+                                    @if(auth()->user()->profile_url)
+                                        <img src="{{ auth()->user()->profile_url }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover">
+                                    @else
+                                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                </button>
+                                <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block hover:block z-50">
+                                    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-2 text-slate-800">
+                                        <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                            <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                                            <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
+                                        </div>
+                                        <a href="{{ route('profile') }}" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition">Profile</a>
+                                        <form method="POST" action="{{ route('logout') }}" class="pt-1 border-t border-slate-100">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer">Logout</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition">Login</a>
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -117,7 +146,7 @@
                     </nav>
 
                     <!-- Right Side Icons & Actions -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 sm:gap-4">
                         <!-- Search Form / Icon -->
                         <form action="{{ route('storefront.products') }}" method="GET" class="relative hidden sm:block">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." class="pl-9 pr-3 py-1.5 rounded-full bg-slate-100 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none w-36 focus:w-56 transition-all duration-300">
@@ -131,6 +160,78 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">3</span>
                         </div>
+
+                        <!-- User Authentication Status: Login Button OR User Avatar with Hover Dropdown -->
+                        @guest
+                            <!-- Login Option (When not logged in) -->
+                            <a href="{{ route('login') }}" 
+                               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs hover:shadow active:scale-95">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                <span>Login</span>
+                            </a>
+                        @endguest
+
+                        @auth
+                            <!-- Logged In User Avatar with Hover Dropdown -->
+                            <div class="relative group">
+                                <button type="button" 
+                                        class="flex items-center p-0.5 rounded-full ring-2 ring-indigo-500/20 group-hover:ring-indigo-600 transition focus:outline-none cursor-pointer"
+                                        aria-label="User account menu">
+                                    @if(auth()->user()->profile_url)
+                                        <img src="{{ auth()->user()->profile_url }}" 
+                                             alt="{{ auth()->user()->name }}" 
+                                             class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                                    @else
+                                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                </button>
+
+                                <!-- Hover Dropdown Menu: Displays Admin Panel, Profile, and Logout -->
+                                <div class="absolute right-0 top-full pt-2 w-56 hidden group-hover:block hover:block z-50">
+                                    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-2 text-left animate-in fade-in duration-150">
+                                        <!-- User Header -->
+                                        <div class="px-3 py-2.5 border-b border-slate-100 mb-1">
+                                            <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                                            <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
+                                            <div class="mt-1 flex items-center gap-1.5">
+                                                <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ auth()->user()->isAdmin() ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600' }}">
+                                                    {{ auth()->user()->role ?? 'User' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Dropdown Action Buttons -->
+                                        <div class="space-y-0.5">
+                                            <!-- Admin Panel Button -->
+                                            <a href="{{ route('admin.dashboard') }}" 
+                                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition group/item">
+                                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                                <span>Admin Panel</span>
+                                            </a>
+
+                                            <!-- Profile Button -->
+                                            <a href="{{ route('profile') }}" 
+                                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition group/item">
+                                                <svg class="w-4 h-4 text-slate-400 group-hover/item:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                <span>Profile</span>
+                                            </a>
+
+                                            <!-- Logout Button -->
+                                            <form method="POST" action="{{ route('logout') }}" class="pt-1 border-t border-slate-100">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left">
+                                                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                                    <span>Logout</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endauth
                     </div>
                 </div>
             </div>

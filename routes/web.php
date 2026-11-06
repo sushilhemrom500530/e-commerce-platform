@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\WebAuthController;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +18,20 @@ Route::get('/product/{product:slug}', [StorefrontController::class, 'show'])->na
 Route::get('/about', [StorefrontController::class, 'about'])->name('storefront.about');
 Route::get('/contact', [StorefrontController::class, 'contact'])->name('storefront.contact');
 Route::post('/contact', [StorefrontController::class, 'submitContact'])->name('storefront.contact.submit');
+
+// Web Authentication & User Profile
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [WebAuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [WebAuthController::class, 'register'])->name('register.submit');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::match(['get', 'post'], '/logout', [WebAuthController::class, 'logout'])->name('logout');
+    Route::get('/profile', [WebAuthController::class, 'profile'])->name('profile');
+    Route::put('/profile', [WebAuthController::class, 'updateProfile'])->name('profile.update');
+});
 
 // Server Health Route
 Route::get('/health', function (): JsonResponse {
