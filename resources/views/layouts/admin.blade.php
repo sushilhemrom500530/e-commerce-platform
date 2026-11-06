@@ -29,7 +29,7 @@
 <body class="min-h-screen antialiased text-slate-800 bg-[#F3F5FA]">
 
     <!-- Mobile Top Navigation Bar -->
-    <header class="lg:hidden bg-[#131427] text-white p-4 flex items-center justify-between sticky top-0 z-50 border-b border-slate-800">
+    <header class="lg:hidden bg-[#131427] text-white p-4 flex items-center justify-between sticky top-0 z-40 border-b border-slate-800">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 font-black text-lg">
             <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#5945F7] to-purple-500 text-white flex items-center justify-center shadow-md">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M16 7a4 4 0 00-8 0v1H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-9a2 2 0 00-2-2h-3V7zm-6 1V7a2 2 0 114 0v1h-4zm-1 6a1 1 0 112 0 3 3 0 006 0 1 1 0 112 0 5 5 0 01-10 0z"/></svg>
@@ -37,21 +37,21 @@
             <span>ShopEase</span>
         </a>
         <button type="button" 
-                onclick="document.getElementById('admin-sidebar').classList.toggle('-translate-x-full'); document.getElementById('admin-sidebar-backdrop').classList.toggle('hidden');" 
-                class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
-                aria-label="Toggle Navigation">
+                onclick="openAdminSidebar()" 
+                class="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white cursor-pointer transition focus:outline-none"
+                aria-label="Open Navigation">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
     </header>
 
-    <!-- Mobile Backdrop -->
+    <!-- Mobile Backdrop Overlay -->
     <div id="admin-sidebar-backdrop" 
-         onclick="document.getElementById('admin-sidebar').classList.add('-translate-x-full'); this.classList.add('hidden');" 
-         class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+         onclick="closeAdminSidebar()" 
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 opacity-0 pointer-events-none lg:hidden transition-opacity duration-300 ease-out cursor-pointer"></div>
 
-    <!-- Sidebar: 100% Fixed Position on Desktop (Never scrolls with document) -->
+    <!-- Sidebar: 100% Fixed Position on Desktop, Off-canvas Slide-over Drawer on Mobile -->
     <aside id="admin-sidebar" 
-           class="fixed inset-y-0 left-0 z-40 w-64 h-screen bg-[#131427] text-slate-300 flex flex-col justify-between p-5 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out overflow-y-auto">
+           class="fixed inset-y-0 left-0 z-50 w-64 h-screen bg-[#131427] text-slate-300 flex flex-col justify-between p-5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-out overflow-y-auto shadow-2xl lg:shadow-none">
         <div class="space-y-6">
             <!-- Brand Header -->
             <div class="flex items-center justify-between px-2 pt-2">
@@ -63,9 +63,13 @@
                     </span>
                     <span class="text-xl font-black text-white tracking-tight">ShopEase</span>
                 </a>
-                <span class="text-slate-500 hover:text-slate-300 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                </span>
+                <!-- Close Button on Mobile Drawer -->
+                <button type="button" 
+                        onclick="closeAdminSidebar()" 
+                        class="lg:hidden w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                        aria-label="Close sidebar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
             <!-- Sidebar Navigation Links -->
@@ -149,15 +153,23 @@
     <!-- Main Content Area: Offset by lg:pl-64 so it flows beside the fixed sidebar -->
     <div class="lg:pl-64 flex flex-col min-w-0 min-h-screen">
         <!-- Topbar -->
-        <header class="bg-white border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-            <!-- Search Input -->
-            <div class="relative w-72 sm:w-80">
-                <input type="text" 
-                       placeholder="Search..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-[#F4F6FB] border-0 text-xs font-medium text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-[#5945F7] focus:outline-none transition">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </span>
+        <header class="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+            <div class="flex items-center gap-3">
+                <button type="button" 
+                        onclick="openAdminSidebar()" 
+                        class="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Open sidebar menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <!-- Search Input -->
+                <div class="relative w-60 sm:w-80">
+                    <input type="text" 
+                           placeholder="Search..." 
+                           class="w-full pl-9 pr-4 py-2 rounded-xl bg-[#F4F6FB] border-0 text-xs font-medium text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-[#5945F7] focus:outline-none transition">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
+                </div>
             </div>
 
             <!-- Admin Profile / Dropdown on Right -->
@@ -200,6 +212,38 @@
             @yield('content')
         </main>
     </div>
+
+    <script>
+        function openAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const backdrop = document.getElementById('admin-sidebar-backdrop');
+            if (!sidebar || !backdrop) return;
+
+            backdrop.classList.remove('pointer-events-none');
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+            sidebar.classList.remove('-translate-x-full');
+            document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+        }
+
+        function closeAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const backdrop = document.getElementById('admin-sidebar-backdrop');
+            if (!sidebar || !backdrop) return;
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            backdrop.classList.add('pointer-events-none');
+            sidebar.classList.add('-translate-x-full');
+            document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAdminSidebar();
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>
