@@ -61,44 +61,40 @@
                         class="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-slate-50/60 transition cursor-pointer group select-none"
                         aria-expanded="false"
                         aria-controls="category-dropdown-content">
-                    <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex items-center gap-3">
                         <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                             </svg>
                         </span>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h2 class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Categories</h2>
-                                @if($selectedCategory)
-                                    <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-bold truncate max-w-[120px]">
-                                        {{ $selectedCategory->name }}
-                                    </span>
-                                @endif
-                            </div>
-                            <p class="text-[11px] text-slate-400 font-medium truncate">
-                                {{ $selectedCategory ? 'Filter applied • Tap arrow to change' : 'Tap arrow to view categories' }}
-                            </p>
-                        </div>
+                        <h2 class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Categories</h2>
                     </div>
 
-                    <div class="flex items-center gap-2 shrink-0">
-                        @if($selectedCategory)
-                            <a href="{{ route('storefront.products', array_filter(['sort' => request('sort'), 'search' => request('search')])) }}" 
-                               onclick="event.stopPropagation()"
-                               class="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline mr-1">
-                                Clear
-                            </a>
-                        @endif
-                        <!-- Prominent Animated Toggle Arrow -->
-                        <span id="category-accordion-arrow" 
-                              class="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 transform">
-                            <svg class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </span>
-                    </div>
+                    <!-- Animated Toggle Arrow -->
+                    <span id="category-accordion-arrow" 
+                          class="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 transform shrink-0">
+                        <svg class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </span>
                 </button>
+
+                <!-- Active Filter Indicator (Cleanly separated, full-width, perfectly responsive) -->
+                @if($selectedCategory)
+                    <div class="px-4 sm:px-5 pb-3.5 -mt-1 flex items-center justify-between gap-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-[11px] font-semibold text-slate-400">Filter:</span>
+                            <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold truncate border border-indigo-100">
+                                {{ $selectedCategory->name }}
+                            </span>
+                        </div>
+                        <a href="{{ route('storefront.products', array_filter(['sort' => request('sort'), 'search' => request('search')])) }}" 
+                           class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline shrink-0">
+                            <span>Clear</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </a>
+                    </div>
+                @endif
 
                 <!-- Collapsible Category Content (Default NOT shown: "default not will view category") -->
                 <div id="category-dropdown-content" class="hidden border-t border-slate-100 p-4 sm:p-5 pt-3 transition-all duration-300 space-y-1">
