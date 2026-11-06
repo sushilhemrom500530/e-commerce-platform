@@ -192,25 +192,8 @@
             </div>
         </header>
 
-        <!-- Flash Messages -->
-        <div class="px-6 sm:px-8 pt-4">
-            @if(session('success'))
-                <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-2xs mb-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between shadow-2xs mb-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        <span>{{ session('error') }}</span>
-                    </div>
-                </div>
-            @endif
-        </div>
+        <!-- Top-Right Toast Notifications -->
+        @include('partials.toast')
 
         <!-- Main Body -->
         <main class="flex-1 p-6 sm:p-8">
