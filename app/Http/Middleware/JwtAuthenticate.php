@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Exceptions\AppException;
 use App\Models\User;
 use App\Services\JwtService;
+use App\Traits\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,27 +34,17 @@ class JwtAuthenticate
         }
 
         if (! $token) {
-            return response()->json([
-                'success' => false,
-                'statusCode' => 401,
-                'message' => 'Access denied. No token provided.',
-                'errorMessages' => [
-                    ['path' => '', 'message' => 'Access denied. No token provided.'],
-                ],
-            ], 401);
+            return ApiResponse::formatError('Access denied. No token provided.', 401, [
+                ['path' => '', 'message' => 'Access denied. No token provided.'],
+            ]);
         }
 
         try {
             $decoded = $this->jwtService->verifyToken($token);
         } catch (AppException $e) {
-            return response()->json([
-                'success' => false,
-                'statusCode' => 401,
-                'message' => $e->getMessage(),
-                'errorMessages' => [
-                    ['path' => '', 'message' => $e->getMessage()],
-                ],
-            ], 401);
+            return ApiResponse::formatError($e->getMessage(), 401, [
+                ['path' => '', 'message' => $e->getMessage()],
+            ]);
         }
 
         $userId = $decoded->id ?? ($decoded->userId ?? null);
@@ -61,14 +52,9 @@ class JwtAuthenticate
 
         // Check authorized roles
         if (! empty($roles) && ! in_array($userRole, $roles, true)) {
-            return response()->json([
-                'success' => false,
-                'statusCode' => 403,
-                'message' => 'You are not authorized',
-                'errorMessages' => [
-                    ['path' => '', 'message' => 'You are not authorized'],
-                ],
-            ], 403);
+            return ApiResponse::formatError('You are not authorized', 403, [
+                ['path' => '', 'message' => 'You are not authorized'],
+            ]);
         }
 
         // Attach user resolver so $request->user() works

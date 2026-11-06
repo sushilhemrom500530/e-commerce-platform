@@ -18,7 +18,7 @@ class ExampleTest extends TestCase
                 'statusCode' => 200,
                 'success' => true,
                 'message' => 'PL Server is running smoothly.',
-                'data' => [
+                'results' => [
                     'name' => 'PL Server',
                     'status' => 'online',
                 ],
@@ -27,7 +27,7 @@ class ExampleTest extends TestCase
                 'statusCode',
                 'success',
                 'message',
-                'data' => [
+                'results' => [
                     'name',
                     'status',
                     'environment',

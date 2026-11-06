@@ -40,7 +40,23 @@ Every successful response returns the following JSON structure:
   "statusCode": 200,
   "success": true,
   "message": "Operation completed successfully.",
-  "data": { ... }
+  "results": { ... }
+}
+```
+
+For paginated responses, an optional `meta` object is included:
+```json
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Items retrieved successfully.",
+  "meta": {
+    "currentPage": 1,
+    "limit": 10,
+    "totalResult": 100,
+    "totalPages": 10
+  },
+  "results": [ ... ]
 }
 ```
 
@@ -175,7 +191,7 @@ Creates an unverified staging account and emails a 6-digit OTP code.
   "statusCode": 201,
   "success": true,
   "message": "OTP has been sent to your email address. Please verify it to activate your account.",
-  "data": {
+  "results": {
     "user": {
       "_id": "1",
       "id": "1",
@@ -188,7 +204,7 @@ Creates an unverified staging account and emails a 6-digit OTP code.
   }
 }
 ```
-*Store `data.token` in memory/state to pass in the next step (`/verify-otp`). In local development, `data.otp` may also be returned for convenience.*
+*Store `results.token` in memory/state to pass in the next step (`/verify-otp`). In local development, `results.otp` may also be returned for convenience.*
 
 ---
 
@@ -216,7 +232,7 @@ Activates the account and promotes the user to a permanent active user.
   "statusCode": 200,
   "success": true,
   "message": "Account activated successfully.",
-  "data": {
+  "results": {
     "user": {
       "_id": "1",
       "id": "1",
@@ -266,7 +282,7 @@ Resends a new OTP code if the previous one expired or was not received.
   "statusCode": 201,
   "success": true,
   "message": "Otp send successfully. Please check your email.",
-  "data": {
+  "results": {
     "otp": null
   }
 }
@@ -296,7 +312,7 @@ Authenticates user via email and password, issuing access & refresh tokens.
   "statusCode": 201,
   "success": true,
   "message": "Login successfully.",
-  "data": {
+  "results": {
     "user": {
       "_id": "1",
       "id": "1",
@@ -347,7 +363,7 @@ Issues a fresh access token when the current token expires.
   "statusCode": 200,
   "success": true,
   "message": "Token refreshed successfully.",
-  "data": {
+  "results": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newAccessToken...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newRefreshToken...",
     "user": {
@@ -376,7 +392,7 @@ Retrieves profile data of the currently logged-in user.
   "statusCode": 200,
   "success": true,
   "message": "User profile retrieved successfully.",
-  "data": {
+  "results": {
     "_id": "1",
     "id": "1",
     "name": "Jane Doe",
@@ -424,7 +440,7 @@ Allows a client or provider to select their active role.
   "statusCode": 200,
   "success": true,
   "message": "Role updated successfully.",
-  "data": {
+  "results": {
     "user": {
       "_id": "1",
       "id": "1",
@@ -475,12 +491,12 @@ sequenceDiagram
   "statusCode": 201,
   "success": true,
   "message": "Otp send successfully. Please check your email to reset password.",
-  "data": {
+  "results": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.resetSessionToken..."
   }
 }
 ```
-*Save `data.token` for Step 2 and Step 3.*
+*Save `results.token` for Step 2 and Step 3.*
 
 ---
 
@@ -502,7 +518,7 @@ sequenceDiagram
   "statusCode": 201,
   "success": true,
   "message": "Opt verified successfully. Please reset your password.",
-  "data": null
+  "results": null
 }
 ```
 
@@ -527,7 +543,7 @@ sequenceDiagram
   "statusCode": 201,
   "success": true,
   "message": "Password reset successfully.",
-  "data": {
+  "results": {
     "message": "Password reset successful"
   }
 }
@@ -557,7 +573,7 @@ For logged-in users who want to change their password from their profile setting
   "statusCode": 201,
   "success": true,
   "message": "Password changed successfully.",
-  "data": {
+  "results": {
     "message": "Password changed successfully"
   }
 }
@@ -589,7 +605,7 @@ Used when your frontend obtains an `idToken` from Google SDK (e.g. Google Sign-I
   "statusCode": 200,
   "success": true,
   "message": "Google sign-in successful.",
-  "data": {
+  "results": {
     "user": {
       "_id": "2",
       "id": "2",
@@ -650,7 +666,7 @@ Used when your application receives an `identityToken` from Apple Authentication
   "statusCode": 200,
   "success": true,
   "message": "Apple sign-in successful.",
-  "data": {
+  "results": {
     "user": {
       "_id": "3",
       "id": "3",
@@ -830,7 +846,7 @@ apiClient.interceptors.response.use(
           { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const newAccessToken = data.data.token;
+        const newAccessToken = data.results.token;
         const newRefreshToken = data.data.refreshToken;
 
         tokenStorage.setTokens(newAccessToken, newRefreshToken);
@@ -886,8 +902,8 @@ export const authService = {
       { otp, email },
       { headers }
     );
-    if (res.data.success && res.data.data.token) {
-      tokenStorage.setTokens(res.data.data.token, res.data.data.refreshToken);
+    if (res.data.success && res.data.results.token) {
+      tokenStorage.setTokens(res.data.results.token, res.data.data.refreshToken);
     }
     return res.data;
   },
@@ -898,8 +914,8 @@ export const authService = {
       email,
       password,
     });
-    if (res.data.success && res.data.data.token) {
-      tokenStorage.setTokens(res.data.data.token, res.data.data.refreshToken);
+    if (res.data.success && res.data.results.token) {
+      tokenStorage.setTokens(res.data.results.token, res.data.data.refreshToken);
     }
     return res.data;
   },
@@ -932,4 +948,5 @@ export const authService = {
 
 ### Q3: Do I need to store the tokens if my frontend uses cookies?
 **Answer:** The backend sets `token` and `refreshToken` in HttpOnly cookies automatically. If your frontend and backend share the domain or configure CORS credentials (`withCredentials: true`), cookies work out of the box. For mobile apps (iOS/Android), store `token` and `refreshToken` in SecureStore/Keychain and send via the `Authorization: Bearer <token>` header.
+
 

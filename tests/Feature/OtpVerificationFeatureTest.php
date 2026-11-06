@@ -43,8 +43,8 @@ class OtpVerificationFeatureTest extends TestCase
                 'success' => true,
                 'message' => 'Account activated successfully.',
             ])
-            ->assertJsonPath('data.user.email', 'alice@example.com')
-            ->assertJsonPath('data.user.isVerified', true);
+            ->assertJsonPath('results.user.email', 'alice@example.com')
+            ->assertJsonPath('results.user.isVerified', true);
 
         // TempUser is deleted, permanent User is created
         $this->assertDatabaseMissing('temp_users', ['email' => 'alice@example.com']);

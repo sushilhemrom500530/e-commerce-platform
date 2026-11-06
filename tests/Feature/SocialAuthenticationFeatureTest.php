@@ -38,11 +38,11 @@ class SocialAuthenticationFeatureTest extends TestCase
                 'success' => true,
                 'message' => 'Google sign-in successful.',
             ])
-            ->assertJsonPath('data.user.email', 'googleuser@example.com')
-            ->assertJsonPath('data.user.provider', 'google')
-            ->assertJsonPath('data.user.providerId', 'google_uid_12345')
+            ->assertJsonPath('results.user.email', 'googleuser@example.com')
+            ->assertJsonPath('results.user.provider', 'google')
+            ->assertJsonPath('results.user.providerId', 'google_uid_12345')
             ->assertJsonStructure([
-                'data' => [
+                'results' => [
                     'user',
                     'accessToken',
                     'token',
@@ -111,10 +111,10 @@ class SocialAuthenticationFeatureTest extends TestCase
                 'success' => true,
                 'message' => 'Apple sign-in successful.',
             ])
-            ->assertJsonPath('data.user.email', 'appleuser@privaterelay.appleid.com')
-            ->assertJsonPath('data.user.provider', 'apple')
-            ->assertJsonPath('data.user.providerId', 'apple_sub_77777')
-            ->assertJsonPath('data.user.role', 'provider');
+            ->assertJsonPath('results.user.email', 'appleuser@privaterelay.appleid.com')
+            ->assertJsonPath('results.user.provider', 'apple')
+            ->assertJsonPath('results.user.providerId', 'apple_sub_77777')
+            ->assertJsonPath('results.user.role', 'provider');
 
         $this->assertDatabaseHas('users', [
             'email' => 'appleuser@privaterelay.appleid.com',

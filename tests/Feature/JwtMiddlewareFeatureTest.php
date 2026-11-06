@@ -51,8 +51,8 @@ class JwtMiddlewareFeatureTest extends TestCase
                 'statusCode' => 200,
                 'success' => true,
             ])
-            ->assertJsonPath('data.email', 'jwtuser@example.com')
-            ->assertJsonPath('data.role', 'client');
+            ->assertJsonPath('results.email', 'jwtuser@example.com')
+            ->assertJsonPath('results.role', 'client');
     }
 
     public function test_access_granted_with_cookie_token(): void
@@ -69,7 +69,7 @@ class JwtMiddlewareFeatureTest extends TestCase
             ->getJson('/api/v1/auth/me');
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.email', 'cookieuser@example.com');
+            ->assertJsonPath('results.email', 'cookieuser@example.com');
     }
 
     public function test_role_enforcement_blocks_unauthorized_roles(): void

@@ -80,7 +80,7 @@ class SecurityRoleAssignmentFeatureTest extends TestCase
             ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.role', 'provider');
+            ->assertJsonPath('results.role', 'provider');
 
         $this->assertEquals('provider', $user->fresh()->role);
     }

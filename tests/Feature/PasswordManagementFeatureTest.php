@@ -34,7 +34,7 @@ class PasswordManagementFeatureTest extends TestCase
                 'message' => 'Otp send successfully. Please check your email to reset password.',
             ])
             ->assertJsonStructure([
-                'data' => [
+                'results' => [
                     'token',
                 ],
             ]);

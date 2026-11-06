@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,11 +41,6 @@ class AppException extends Exception
 
     public function render(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => false,
-            'statusCode' => $this->statusCode,
-            'message' => $this->getMessage(),
-            'errorMessages' => $this->errorMessages,
-        ], $this->statusCode);
+        return ApiResponse::formatError($this->getMessage(), $this->statusCode, $this->errorMessages);
     }
 }

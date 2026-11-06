@@ -31,7 +31,7 @@ class RegistrationFeatureTest extends TestCase
                 'message' => 'OTP has been sent to your email address. Please verify it to activate your account.',
             ])
             ->assertJsonStructure([
-                'data' => [
+                'results' => [
                     'user' => ['_id', 'id', 'email', 'name', 'role'],
                     'role',
                     'token',
@@ -105,6 +105,6 @@ class RegistrationFeatureTest extends TestCase
         ]);
 
         $response->assertStatus(201);
-        $this->assertNull($response->json('data.otp'));
+        $this->assertNull($response->json('results.otp'));
     }
 }

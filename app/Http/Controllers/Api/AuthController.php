@@ -38,12 +38,11 @@ class AuthController extends Controller
     {
         $result = $this->authService->registerUser($request->validated());
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'OTP has been sent to your email address. Please verify it to activate your account.',
-            'data' => $result,
-        ], 201);
+        return $this->sendResponse(
+            $result,
+            'OTP has been sent to your email address. Please verify it to activate your account.',
+            201
+        );
     }
 
     /**
@@ -55,12 +54,7 @@ class AuthController extends Controller
 
         $isProduction = app()->environment('production');
 
-        $response = response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Login successfully.',
-            'data' => $result,
-        ], 201);
+        $response = $this->sendResponse($result, 'Login successfully.', 201);
 
         $response->headers->setCookie(
             new Cookie('refreshToken', $result['refreshToken'], time() + (365 * 86400), '/', null, $isProduction, true, false, Cookie::SAMESITE_LAX)
@@ -82,12 +76,7 @@ class AuthController extends Controller
 
         $isProduction = app()->environment('production');
 
-        $response = response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'Account activated successfully.',
-            'data' => $result,
-        ], 200);
+        $response = $this->sendResponse($result, 'Account activated successfully.', 200);
 
         if (isset($result['refreshToken'])) {
             $response->headers->setCookie(
@@ -122,12 +111,7 @@ class AuthController extends Controller
 
         $result = $this->authService->selectRole((string) $targetIdentifier, (string) $request->input('role'));
 
-        return response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'Role updated successfully.',
-            'data' => $result,
-        ], 200);
+        return $this->sendResponse($result, 'Role updated successfully.', 200);
     }
 
     /**
@@ -137,12 +121,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->resendOtp($request->input('email'));
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Otp send successfully. Please check your email.',
-            'data' => $result,
-        ], 201);
+        return $this->sendResponse($result, 'Otp send successfully. Please check your email.', 201);
     }
 
     /**
@@ -152,12 +131,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->forgotPassword($request->input('email'));
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Otp send successfully. Please check your email to reset password.',
-            'data' => $result,
-        ], 201);
+        return $this->sendResponse($result, 'Otp send successfully. Please check your email to reset password.', 201);
     }
 
     /**
@@ -172,12 +146,7 @@ class AuthController extends Controller
 
         $this->authService->forgotPasswordOtpVerify($token, $request->input('otp'));
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Opt verified successfully. Please reset your password.',
-            'data' => null,
-        ], 201);
+        return $this->sendResponse(null, 'Opt verified successfully. Please reset your password.', 201);
     }
 
     /**
@@ -192,14 +161,9 @@ class AuthController extends Controller
 
         $this->authService->resetPassword($token, $request->input('newPassword'));
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Password reset successfully.',
-            'data' => [
-                'message' => 'Password reset successful',
-            ],
-        ], 201);
+        return $this->sendResponse([
+            'message' => 'Password reset successful',
+        ], 'Password reset successfully.', 201);
     }
 
     /**
@@ -214,14 +178,9 @@ class AuthController extends Controller
 
         $this->authService->changePassword($user, $request->input('oldPassword'), $request->input('newPassword'));
 
-        return response()->json([
-            'statusCode' => 201,
-            'success' => true,
-            'message' => 'Password changed successfully.',
-            'data' => [
-                'message' => 'Password changed successfully',
-            ],
-        ], 201);
+        return $this->sendResponse([
+            'message' => 'Password changed successfully',
+        ], 'Password changed successfully.', 201);
     }
 
     /**
@@ -233,17 +192,12 @@ class AuthController extends Controller
 
         $isProduction = app()->environment('production');
 
-        $response = response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'Google sign-in successful.',
-            'data' => [
-                'user' => $result['user'],
-                'accessToken' => $result['token'],
-                'token' => $result['token'],
-                'refreshToken' => $result['refreshToken'],
-            ],
-        ], 200);
+        $response = $this->sendResponse([
+            'user' => $result['user'],
+            'accessToken' => $result['token'],
+            'token' => $result['token'],
+            'refreshToken' => $result['refreshToken'],
+        ], 'Google sign-in successful.', 200);
 
         $response->headers->setCookie(
             new Cookie('refreshToken', $result['refreshToken'], time() + (365 * 86400), '/', null, $isProduction, true, false, Cookie::SAMESITE_LAX)
@@ -264,17 +218,12 @@ class AuthController extends Controller
 
         $isProduction = app()->environment('production');
 
-        $response = response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'Apple sign-in successful.',
-            'data' => [
-                'user' => $result['user'],
-                'accessToken' => $result['token'],
-                'token' => $result['token'],
-                'refreshToken' => $result['refreshToken'],
-            ],
-        ], 200);
+        $response = $this->sendResponse([
+            'user' => $result['user'],
+            'accessToken' => $result['token'],
+            'token' => $result['token'],
+            'refreshToken' => $result['refreshToken'],
+        ], 'Apple sign-in successful.', 200);
 
         $response->headers->setCookie(
             new Cookie('refreshToken', $result['refreshToken'], time() + (365 * 86400), '/', null, $isProduction, true, false, Cookie::SAMESITE_LAX)
@@ -295,10 +244,7 @@ class AuthController extends Controller
         $validRoles = ['client', 'provider']; // Security fix: 'admin' is prohibited
 
         if (! in_array($role, $validRoles, true)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid role parameter. Must be provider or client.',
-            ], 400);
+            return $this->sendError('Invalid role parameter. Must be provider or client.', 400);
         }
 
         $clientId = config('services.google.client_id');
@@ -328,7 +274,7 @@ class AuthController extends Controller
     {
         $code = $request->query('code');
         if (! $code) {
-            return response()->json(['success' => false, 'message' => 'Authentication failed'], 401);
+            return $this->sendError('Authentication failed', 401);
         }
 
         $stateDecoded = ['role' => 'client', 'mobile' => false];
@@ -356,7 +302,7 @@ class AuthController extends Controller
         ]);
 
         if (! $response->successful()) {
-            return response()->json(['success' => false, 'message' => 'Failed to obtain access token from Google'], 400);
+            return $this->sendError('Failed to obtain access token from Google', 400);
         }
 
         $tokenData = $response->json();
@@ -401,12 +347,7 @@ class AuthController extends Controller
 
         $result = $this->authService->refreshToken($refreshToken);
 
-        return response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'Token refreshed successfully.',
-            'data' => $result,
-        ], 200);
+        return $this->sendResponse($result, 'Token refreshed successfully.', 200);
     }
 
     /**
@@ -419,11 +360,6 @@ class AuthController extends Controller
             throw new AppException(401, 'Unauthenticated');
         }
 
-        return response()->json([
-            'statusCode' => 200,
-            'success' => true,
-            'message' => 'User profile retrieved successfully.',
-            'data' => (new UserResource($user))->resolve(),
-        ], 200);
+        return $this->sendResponse((new UserResource($user))->resolve(), 'User profile retrieved successfully.', 200);
     }
 }

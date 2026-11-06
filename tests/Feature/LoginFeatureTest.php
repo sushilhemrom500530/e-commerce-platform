@@ -33,7 +33,7 @@ class LoginFeatureTest extends TestCase
                 'message' => 'Login successfully.',
             ])
             ->assertJsonStructure([
-                'data' => [
+                'results' => [
                     'user' => ['_id', 'id', 'email', 'name', 'role'],
                     'role',
                     'token',
