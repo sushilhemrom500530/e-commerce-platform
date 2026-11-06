@@ -6,15 +6,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (): JsonResponse {
-    $dbStatus = Cache::remember('server_db_status', 10, function (): string {
+    try {
+        $dbStatus = Cache::remember('server_db_status', 10, function (): string {
+            try {
+                DB::connection()->getPdo();
+
+                return 'connected';
+            } catch (Throwable) {
+                return 'disconnected';
+            }
+        });
+    } catch (Throwable) {
         try {
             DB::connection()->getPdo();
 
-            return 'connected';
+            $dbStatus = 'connected';
         } catch (Throwable) {
-            return 'disconnected';
+            $dbStatus = 'disconnected';
         }
-    });
+    }
 
     $appName = (string) config('app.name', 'PL Server');
 
