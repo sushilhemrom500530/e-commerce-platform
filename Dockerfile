@@ -78,7 +78,10 @@ COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Ensure proper permissions and strip any Windows CRLF line endings
-RUN chmod +x /usr/local/bin/entrypoint.sh \
+RUN mkdir -p /tmp/nginx_client_body /tmp/nginx_fastcgi /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/fastcgi \
+    && chown -R www-data:www-data /tmp/nginx_client_body /tmp/nginx_fastcgi /var/lib/nginx /var/log/nginx \
+    && chmod -R 777 /tmp/nginx_client_body /tmp/nginx_fastcgi \
+    && chmod +x /usr/local/bin/entrypoint.sh \
     && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache

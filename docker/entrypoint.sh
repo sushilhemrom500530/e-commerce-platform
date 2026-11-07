@@ -6,12 +6,22 @@ PORT="${PORT:-10000}"
 echo "==> Configuring Nginx to listen on port: $PORT"
 sed -i "s/LISTEN_PORT/$PORT/g" /etc/nginx/http.d/default.conf
 
+# Ensure Nginx temporary upload directories exist and are writable by www-data
+mkdir -p /tmp/nginx_client_body \
+         /tmp/nginx_fastcgi \
+         /var/lib/nginx/tmp/client_body \
+         /var/lib/nginx/tmp/fastcgi \
+         /var/log/nginx
+
+chown -R www-data:www-data /tmp/nginx_client_body /tmp/nginx_fastcgi /var/lib/nginx /var/log/nginx
+chmod -R 777 /tmp/nginx_client_body /tmp/nginx_fastcgi /var/lib/nginx /var/log/nginx
+
 # Ensure storage directories exist
 mkdir -p /var/www/html/storage/framework/cache/data \
          /var/www/html/storage/framework/sessions \
          /var/www/html/storage/framework/views \
          /var/www/html/storage/logs \
-         /var/www/html/storage/app/public
+         /var/www/html/storage/app/public/products/featured
 
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
