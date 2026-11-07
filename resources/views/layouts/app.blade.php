@@ -105,9 +105,9 @@
                     </a>
 
                     <!-- Middle Navigation Links -->
-                    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                        <a href="{{ route('storefront.index') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.index') && !request('category') ? 'text-indigo-600 font-bold' : '' }}">Home</a>
-                        <a href="{{ route('storefront.products') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.products') ? 'text-indigo-600 font-bold' : '' }}">Shop</a>
+                    <nav id="desktop-nav" class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                        <a href="{{ route('storefront.index') }}" data-nav="home" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.index') && !request('category') ? 'text-indigo-600 font-bold' : '' }}">Home</a>
+                        <a href="{{ route('storefront.products') }}" data-nav="shop" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.products') ? 'text-indigo-600 font-bold' : '' }}">Shop</a>
                         
                         <!-- Categories Dropdown -->
                         <div class="relative group">
@@ -127,8 +127,8 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('storefront.about') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.about') ? 'text-indigo-600 font-bold' : '' }}">About</a>
-                        <a href="{{ route('storefront.contact') }}" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.contact') ? 'text-indigo-600 font-bold' : '' }}">Contact</a>
+                        <a href="{{ route('storefront.about') }}" data-nav="about" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.about') ? 'text-indigo-600 font-bold' : '' }}">About</a>
+                        <a href="{{ route('storefront.contact') }}" data-nav="contact" class="transition hover:text-indigo-600 {{ request()->routeIs('storefront.contact') ? 'text-indigo-600 font-bold' : '' }}">Contact</a>
                     </nav>
 
                     <!-- Right Side Icons & Actions -->
@@ -294,6 +294,7 @@
                 <nav class="space-y-1 text-sm font-semibold text-slate-700">
                     <!-- Home -->
                     <a href="{{ route('storefront.index') }}" 
+                       data-mobile-nav="home"
                        class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.index') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Home</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
@@ -301,6 +302,7 @@
 
                     <!-- Shop -->
                     <a href="{{ route('storefront.products') }}" 
+                       data-mobile-nav="shop"
                        class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.products') && !request('category') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Shop</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
@@ -346,6 +348,7 @@
 
                     <!-- About -->
                     <a href="{{ route('storefront.about') }}" 
+                       data-mobile-nav="about"
                        class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.about') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>About</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
@@ -353,6 +356,7 @@
 
                     <!-- Contact -->
                     <a href="{{ route('storefront.contact') }}" 
+                       data-mobile-nav="contact"
                        class="flex items-center justify-between px-3.5 py-3 rounded-xl transition {{ request()->routeIs('storefront.contact') ? 'bg-indigo-50 text-indigo-600 font-bold' : 'hover:bg-slate-50 hover:text-indigo-600' }}">
                         <span>Contact</span>
                         <span class="text-xs text-slate-400">&rsaquo;</span>
@@ -421,7 +425,7 @@
     @include('partials.toast')
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <main id="main-content" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {{ $slot ?? '' }}
         @yield('content')
     </main>
@@ -596,32 +600,66 @@
         </div>
     </div>
 
-    <!-- Instant Page Preloader (Hover & Touch) -->
+    <!-- Seamless Client-Side Navigation Engine (Instant Page Transitions, Zero Full-Page Reloads) -->
     <script>
         (function() {
-            const prefetched = new Set();
-            function preloadPage(url) {
-                if (!url || prefetched.has(url)) return;
-                try {
-                    const u = new URL(url, window.location.origin);
-                    if (u.origin !== window.location.origin) return;
-                    if (u.pathname === window.location.pathname && u.search === window.location.search) return;
-                    if (u.pathname.includes('logout') || u.pathname.includes('/checkout')) return;
+            const pageCache = new Map();
+            let isNavigating = false;
 
-                    prefetched.add(url);
-                    const link = document.createElement('link');
-                    link.rel = 'prefetch';
-                    link.href = url;
-                    link.as = 'document';
-                    document.head.appendChild(link);
-                } catch(e) {}
+            function isNavigable(a) {
+                if (!a || !a.href) return false;
+                if (a.target === '_blank' || a.hasAttribute('download')) return false;
+                if (a.getAttribute('role') === 'button') return false;
+                const href = a.getAttribute('href') || '';
+                if (href.startsWith('#') || href.startsWith('javascript:')) return false;
+
+                try {
+                    const u = new URL(a.href, window.location.origin);
+                    if (u.origin !== window.location.origin) return false;
+                    // Keep native browser navigation for admin portal, logout, and checkout
+                    if (u.pathname.startsWith('/admin') || u.pathname.includes('logout') || u.pathname.includes('/checkout')) return false;
+                    // Ignore clicks on same exact URL
+                    if (u.href === window.location.href) return false;
+                    return true;
+                } catch(e) {
+                    return false;
+                }
             }
 
+            async function fetchHtml(url) {
+                if (pageCache.has(url)) {
+                    return pageCache.get(url);
+                }
+                const promise = fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-Spa-Navigation': '1'
+                    }
+                }).then(async res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const html = await res.text();
+                    setTimeout(() => pageCache.delete(url), 90000);
+                    return html;
+                }).catch(err => {
+                    pageCache.delete(url);
+                    throw err;
+                });
+
+                pageCache.set(url, promise);
+                return promise;
+            }
+
+            function preloadPage(url) {
+                if (!url || pageCache.has(url)) return;
+                fetchHtml(url).catch(() => {});
+            }
+
+            // Hover & Touch prefetching (starts background fetch 35ms after hover/touch)
             let hoverTimer = null;
             document.addEventListener('mouseover', function(e) {
-                const anchor = e.target.closest('a');
-                if (!anchor || !anchor.href) return;
-                hoverTimer = setTimeout(() => preloadPage(anchor.href), 40);
+                const a = e.target.closest('a');
+                if (!a || !isNavigable(a)) return;
+                hoverTimer = setTimeout(() => preloadPage(a.href), 35);
             }, { passive: true });
 
             document.addEventListener('mouseout', function(e) {
@@ -629,10 +667,146 @@
             }, { passive: true });
 
             document.addEventListener('touchstart', function(e) {
-                const anchor = e.target.closest('a');
-                if (!anchor || !anchor.href) return;
-                preloadPage(anchor.href);
+                const a = e.target.closest('a');
+                if (!a || !isNavigable(a)) return;
+                preloadPage(a.href);
             }, { passive: true });
+
+            async function navigateTo(url, pushState = true) {
+                if (isNavigating) return;
+                isNavigating = true;
+
+                try {
+                    const html = await fetchHtml(url);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const newMain = doc.getElementById('main-content') || doc.querySelector('main');
+                    const currentMain = document.getElementById('main-content') || document.querySelector('main');
+
+                    if (!newMain || !currentMain) {
+                        window.location.href = url;
+                        return;
+                    }
+
+                    // 1. Swap main page content instantly without page reload
+                    currentMain.innerHTML = newMain.innerHTML;
+
+                    // 2. Update page title
+                    if (doc.title) {
+                        document.title = doc.title;
+                    }
+
+                    // 3. Update browser history
+                    if (pushState) {
+                        window.history.pushState({ url }, '', url);
+                    }
+
+                    // 4. Update active navigation styling
+                    updateActiveNav(url);
+
+                    // 5. Sync cart badges if updated
+                    const newBadge = doc.getElementById('navbar-cart-badge');
+                    const curBadge = document.getElementById('navbar-cart-badge');
+                    if (newBadge && curBadge) {
+                        curBadge.textContent = newBadge.textContent;
+                        if (newBadge.classList.contains('hidden')) curBadge.classList.add('hidden');
+                        else curBadge.classList.remove('hidden');
+                    }
+                    const newDrawerBadge = doc.getElementById('mobile-drawer-cart-badge');
+                    const curDrawerBadge = document.getElementById('mobile-drawer-cart-badge');
+                    if (newDrawerBadge && curDrawerBadge) {
+                        curDrawerBadge.textContent = newDrawerBadge.textContent;
+                        if (newDrawerBadge.classList.contains('hidden')) curDrawerBadge.classList.add('hidden');
+                        else curDrawerBadge.classList.remove('hidden');
+                    }
+
+                    // 6. Scroll smoothly to top
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+
+                    // 7. Close mobile drawer if open
+                    if (typeof closeMobileDrawer === 'function') {
+                        closeMobileDrawer();
+                    }
+
+                    // 8. Re-execute scripts embedded inside new main content
+                    const scripts = currentMain.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+
+                    // 9. Re-initialize page-specific behaviors
+                    if (typeof initCategoryAccordion === 'function') {
+                        initCategoryAccordion();
+                    }
+
+                    document.dispatchEvent(new CustomEvent('page:navigated', { detail: { url } }));
+
+                } catch (err) {
+                    // Safe graceful fallback to native navigation
+                    window.location.href = url;
+                } finally {
+                    isNavigating = false;
+                }
+            }
+
+            // Click interceptor for instant zero-reload transitions
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (!a || !isNavigable(a)) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+
+                e.preventDefault();
+                navigateTo(a.href, true);
+            });
+
+            // Browser Back and Forward button support
+            window.addEventListener('popstate', function() {
+                navigateTo(window.location.href, false);
+            });
+
+            function updateActiveNav(urlStr) {
+                try {
+                    const u = new URL(urlStr, window.location.origin);
+                    const path = u.pathname;
+                    const search = u.search;
+
+                    document.querySelectorAll('#desktop-nav a[data-nav]').forEach(el => {
+                        const type = el.getAttribute('data-nav');
+                        let active = false;
+                        if (type === 'home') active = (path === '/' && !search.includes('category='));
+                        else if (type === 'shop') active = (path === '/products');
+                        else if (type === 'about') active = (path === '/about');
+                        else if (type === 'contact') active = (path === '/contact');
+
+                        if (active) {
+                            el.classList.add('text-indigo-600', 'font-bold');
+                        } else {
+                            el.classList.remove('text-indigo-600', 'font-bold');
+                        }
+                    });
+
+                    document.querySelectorAll('[data-mobile-nav]').forEach(el => {
+                        const type = el.getAttribute('data-mobile-nav');
+                        let active = false;
+                        if (type === 'home') active = (path === '/' && !search.includes('category='));
+                        else if (type === 'shop') active = (path === '/products');
+                        else if (type === 'about') active = (path === '/about');
+                        else if (type === 'contact') active = (path === '/contact');
+
+                        if (active) {
+                            el.classList.add('bg-indigo-50', 'text-indigo-600', 'font-bold');
+                            el.classList.remove('hover:bg-slate-50', 'hover:text-indigo-600');
+                        } else {
+                            el.classList.remove('bg-indigo-50', 'text-indigo-600', 'font-bold');
+                            el.classList.add('hover:bg-slate-50', 'hover:text-indigo-600');
+                        }
+                    });
+                } catch(e) {}
+            }
         })();
     </script>
     @stack('scripts')
