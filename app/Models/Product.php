@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -44,6 +45,22 @@ class Product extends Model
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
+        });
+
+        static::saved(function (Product $product): void {
+            Cache::forget('storefront_home_categories');
+            Cache::forget('storefront_home_categories_v2');
+            Cache::forget('storefront_catalog_categories');
+            Cache::forget('storefront_catalog_categories_v2');
+            Cache::forget("related_products_{$product->id}");
+        });
+
+        static::deleted(function (Product $product): void {
+            Cache::forget('storefront_home_categories');
+            Cache::forget('storefront_home_categories_v2');
+            Cache::forget('storefront_catalog_categories');
+            Cache::forget('storefront_catalog_categories_v2');
+            Cache::forget("related_products_{$product->id}");
         });
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -34,6 +35,22 @@ class Category extends Model
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
+        });
+
+        static::saved(function (): void {
+            Cache::forget('storefront_nav_categories');
+            Cache::forget('storefront_home_categories');
+            Cache::forget('storefront_home_categories_v2');
+            Cache::forget('storefront_catalog_categories');
+            Cache::forget('storefront_catalog_categories_v2');
+        });
+
+        static::deleted(function (): void {
+            Cache::forget('storefront_nav_categories');
+            Cache::forget('storefront_home_categories');
+            Cache::forget('storefront_home_categories_v2');
+            Cache::forget('storefront_catalog_categories');
+            Cache::forget('storefront_catalog_categories_v2');
         });
     }
 

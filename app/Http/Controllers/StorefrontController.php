@@ -8,6 +8,7 @@ use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class StorefrontController extends Controller
@@ -18,46 +19,85 @@ class StorefrontController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $featuredSlugs = ['electronics', 'fashion', 'home-living', 'sports', 'books'];
-        $homeCategories = Category::where('is_active', true)
-            ->whereIn('slug', $featuredSlugs)
-            ->whereHas('products', fn ($q) => $q->where('is_active', true))
-            ->with([
-                'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
-                'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
-            ])
-            ->withCount('products')
-            ->get()
-            ->sortBy(fn ($cat) => array_search($cat->slug, $featuredSlugs))
-            ->values();
 
-        if ($homeCategories->count() < 5) {
-            $existingIds = $homeCategories->pluck('id')->all();
-            $additional = Category::where('is_active', true)
-                ->whereNotIn('id', $existingIds)
+        $categoriesData = Cache::remember('storefront_home_categories_v2', 3600, function () use ($featuredSlugs) {
+            $categories = Category::where('is_active', true)
+                ->whereIn('slug', $featuredSlugs)
                 ->whereHas('products', fn ($q) => $q->where('is_active', true))
                 ->with([
                     'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
                     'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
                 ])
                 ->withCount('products')
-                ->take(5 - $homeCategories->count())
-                ->get();
-            $homeCategories = $homeCategories->concat($additional);
-        }
+                ->get()
+                ->sortBy(fn ($cat) => array_search($cat->slug, $featuredSlugs))
+                ->values();
 
-        $categories = Category::where('is_active', true)->withCount('products')->get();
+            if ($categories->count() < 5) {
+                $existingIds = $categories->pluck('id')->all();
+                $additional = Category::where('is_active', true)
+                    ->whereNotIn('id', $existingIds)
+                    ->whereHas('products', fn ($q) => $q->where('is_active', true))
+                    ->with([
+                        'products' => fn ($q) => $q->where('is_active', true)->with(['category', 'subcategory'])->latest()->take(4),
+                        'subcategories' => fn ($q) => $q->where('is_active', true)->take(5),
+                    ])
+                    ->withCount('products')
+                    ->take(5 - $categories->count())
+                    ->get();
+                $categories = $categories->concat($additional);
+            }
 
-        $subcategories = Subcategory::where('is_active', true)
-            ->whereHas('products', fn ($q) => $q->where('is_active', true))
-            ->with(['category', 'products' => fn ($q) => $q->where('is_active', true)->latest()])
-            ->orderBy('name')
-            ->get();
+            return $categories->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'slug' => $c->slug,
+                    'description' => $c->description,
+                    'products_count' => (int) $c->products_count,
+                    'products' => $c->products->map(fn ($p) => [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'slug' => $p->slug,
+                        'image_url' => $p->image_url,
+                        'discount_percentage' => $p->discount_percentage,
+                        'new_price' => (float) $p->new_price,
+                        'old_price' => $p->old_price ? (float) $p->old_price : null,
+                        'subcategory_name' => $p->subcategory?->name,
+                    ])->all(),
+                ];
+            })->all();
+        });
+
+        $homeCategories = collect($categoriesData)->map(function ($c) {
+            $cat = new \stdClass;
+            $cat->id = $c['id'];
+            $cat->name = $c['name'];
+            $cat->slug = $c['slug'];
+            $cat->description = $c['description'];
+            $cat->products_count = $c['products_count'];
+            $cat->products = collect($c['products'])->map(function ($p) {
+                $prod = new \stdClass;
+                $prod->id = $p['id'];
+                $prod->name = $p['name'];
+                $prod->slug = $p['slug'];
+                $prod->image_url = $p['image_url'];
+                $prod->discount_percentage = $p['discount_percentage'];
+                $prod->new_price = $p['new_price'];
+                $prod->old_price = $p['old_price'];
+                $prod->subcategory = $p['subcategory_name'] ? (object) ['name' => $p['subcategory_name']] : null;
+
+                return $prod;
+            });
+
+            return $cat;
+        });
 
         if ($request->expectsJson() && ! $request->header('X-Inertia')) {
             return $this->sendResponse($homeCategories, 'Catalog retrieved successfully.');
         }
 
-        return view('storefront.index', compact('homeCategories', 'categories', 'subcategories'));
+        return view('storefront.index', compact('homeCategories'));
     }
 
     /**
@@ -65,11 +105,32 @@ class StorefrontController extends Controller
      */
     public function products(Request $request): View|JsonResponse
     {
-        $categories = Category::where('is_active', true)
-            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
-            ->withCount('products')
-            ->orderBy('name')
-            ->get();
+        $categoriesData = Cache::remember('storefront_catalog_categories_v2', 3600, function () {
+            return Category::where('is_active', true)
+                ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
+                ->orderBy('name')
+                ->get()
+                ->map(fn ($c) => [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'slug' => $c->slug,
+                    'subcategories' => $c->subcategories->map(fn ($s) => [
+                        'id' => $s->id,
+                        'name' => $s->name,
+                        'slug' => $s->slug,
+                    ])->all(),
+                ])->all();
+        });
+
+        $categories = collect($categoriesData)->map(function ($c) {
+            $cat = new \stdClass;
+            $cat->id = $c['id'];
+            $cat->name = $c['name'];
+            $cat->slug = $c['slug'];
+            $cat->subcategories = collect($c['subcategories'])->map(fn ($s) => (object) $s);
+
+            return $cat;
+        });
 
         $selectedCategory = null;
         if ($request->filled('category')) {
@@ -144,11 +205,13 @@ class StorefrontController extends Controller
             return $this->sendResponse($product, 'Product retrieved successfully.');
         }
 
-        $relatedProducts = Product::where('subcategory_id', $product->subcategory_id)
-            ->where('id', '!=', $product->id)
-            ->where('is_active', true)
-            ->limit(4)
-            ->get();
+        $relatedProducts = Cache::remember("related_products_{$product->id}", 3600, function () use ($product) {
+            return Product::where('subcategory_id', $product->subcategory_id)
+                ->where('id', '!=', $product->id)
+                ->where('is_active', true)
+                ->limit(4)
+                ->get();
+        });
 
         return view('storefront.show', compact('product', 'relatedProducts'));
     }

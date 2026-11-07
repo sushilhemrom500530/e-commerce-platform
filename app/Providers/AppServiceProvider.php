@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +32,32 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production') || str_starts_with((string) config('app.url'), 'https://') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
             URL::forceScheme('https');
         }
+
+        // Cache and share navbar categories globally to eliminate redundant database queries on every page
+        View::composer('layouts.app', function ($view) {
+            try {
+                $categories = Cache::remember('storefront_nav_categories', 3600, function () {
+                    return Category::where('is_active', true)
+                        ->orderBy('name')
+                        ->take(8)
+                        ->get(['id', 'name', 'slug'])
+                        ->map(fn ($c) => [
+                            'id' => (int) $c->id,
+                            'name' => (string) $c->name,
+                            'slug' => (string) $c->slug,
+                        ])
+                        ->values()
+                        ->all();
+                });
+            } catch (\Throwable) {
+                $categories = [];
+            }
+
+            $catCollection = collect($categories)->map(fn ($c) => (object) $c);
+
+            $view->with('navCategories', $catCollection->take(6))
+                ->with('mobileNavCategories', $catCollection->take(8));
+        });
 
         // Global API baseline rate limiting (matching Express 200 req/min)
         RateLimiter::for('api', function (Request $request) {
