@@ -6,7 +6,6 @@ use App\Models\Category;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -33,30 +32,20 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Cache and share navbar categories globally to eliminate redundant database queries on every page
+        // Share navbar categories efficiently across storefront layout without redundant queries
         View::composer('layouts.app', function ($view) {
             try {
-                $categories = Cache::remember('storefront_nav_categories', 3600, function () {
-                    return Category::where('is_active', true)
-                        ->orderBy('name')
-                        ->take(8)
-                        ->get(['id', 'name', 'slug'])
-                        ->map(fn ($c) => [
-                            'id' => (int) $c->id,
-                            'name' => (string) $c->name,
-                            'slug' => (string) $c->slug,
-                        ])
-                        ->values()
-                        ->all();
-                });
+                $categories = Category::where('is_active', true)
+                    ->select('id', 'name', 'slug')
+                    ->orderBy('name')
+                    ->take(8)
+                    ->get();
             } catch (\Throwable) {
-                $categories = [];
+                $categories = collect();
             }
 
-            $catCollection = collect($categories)->map(fn ($c) => (object) $c);
-
-            $view->with('navCategories', $catCollection->take(6))
-                ->with('mobileNavCategories', $catCollection->take(8));
+            $view->with('navCategories', $categories->take(6))
+                ->with('mobileNavCategories', $categories);
         });
 
         // Global API baseline rate limiting (matching Express 200 req/min)

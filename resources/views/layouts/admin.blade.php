@@ -9,6 +9,31 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+
+    <!-- Preload Critical Assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
+    <link rel="preload" as="script" href="https://cdn.tailwindcss.com">
+    <link rel="preload" as="image" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Instant Page Prerender & Speculation Rules for Admin -->
+    <script type="speculationrules">
+    {
+      "prerender": [
+        {
+          "where": {
+            "and": [
+              { "href_matches": "/admin*" },
+              { "not": { "href_matches": "*/logout*" } }
+            ]
+          },
+          "eagerness": "moderate"
+        }
+      ]
+    }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -250,12 +275,11 @@
         });
     </script>
 
-    <!-- Instant Page Prefetcher & Fast Navigation Progress Bar -->
-    <div id="page-nav-bar" class="fixed top-0 left-0 h-[2.5px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-[99999] transition-all duration-300 w-0 opacity-0 pointer-events-none"></div>
+    <!-- Instant Page Preloader (Hover & Touch) -->
     <script>
         (function() {
             const prefetched = new Set();
-            function prefetchUrl(url) {
+            function preloadPage(url) {
                 if (!url || prefetched.has(url)) return;
                 try {
                     const u = new URL(url, window.location.origin);
@@ -276,7 +300,7 @@
             document.addEventListener('mouseover', function(e) {
                 const anchor = e.target.closest('a');
                 if (!anchor || !anchor.href) return;
-                hoverTimer = setTimeout(() => prefetchUrl(anchor.href), 50);
+                hoverTimer = setTimeout(() => preloadPage(anchor.href), 40);
             }, { passive: true });
 
             document.addEventListener('mouseout', function(e) {
@@ -286,23 +310,8 @@
             document.addEventListener('touchstart', function(e) {
                 const anchor = e.target.closest('a');
                 if (!anchor || !anchor.href) return;
-                prefetchUrl(anchor.href);
+                preloadPage(anchor.href);
             }, { passive: true });
-
-            document.addEventListener('click', function(e) {
-                const a = e.target.closest('a');
-                if (!a || !a.href || a.target === '_blank' || a.href.startsWith('javascript:') || a.href.includes('#') || a.getAttribute('onclick')) return;
-                try {
-                    const u = new URL(a.href, window.location.origin);
-                    if (u.origin === window.location.origin && (u.pathname !== window.location.pathname || u.search !== window.location.search)) {
-                        const bar = document.getElementById('page-nav-bar');
-                        if (bar) {
-                            bar.style.opacity = '1';
-                            bar.style.width = '70%';
-                        }
-                    }
-                } catch(e) {}
-            });
         })();
     </script>
 
