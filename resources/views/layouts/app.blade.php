@@ -604,7 +604,6 @@
     <script>
         (function() {
             const pageCache = new Map();
-            let isNavigating = false;
 
             function isNavigable(a) {
                 if (!a || !a.href) return false;
@@ -626,10 +625,11 @@
                 }
             }
 
-            async function fetchHtml(url) {
-                if (pageCache.has(url)) {
+            async function fetchHtml(url, bypassCache = false) {
+                if (!bypassCache && pageCache.has(url)) {
                     return pageCache.get(url);
                 }
+
                 const promise = fetch(url, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -638,14 +638,19 @@
                 }).then(async res => {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     const html = await res.text();
-                    setTimeout(() => pageCache.delete(url), 90000);
+                    pageCache.set(url, html);
+                    try {
+                        sessionStorage.setItem('spa_cache_' + url, html);
+                    } catch(e) {}
                     return html;
                 }).catch(err => {
                     pageCache.delete(url);
                     throw err;
                 });
 
-                pageCache.set(url, promise);
+                if (!bypassCache) {
+                    pageCache.set(url, promise);
+                }
                 return promise;
             }
 
@@ -654,12 +659,12 @@
                 fetchHtml(url).catch(() => {});
             }
 
-            // Hover & Touch prefetching (starts background fetch 35ms after hover/touch)
+            // Hover & Touch prefetching (starts background fetch 25ms after hover/touch)
             let hoverTimer = null;
             document.addEventListener('mouseover', function(e) {
                 const a = e.target.closest('a');
                 if (!a || !isNavigable(a)) return;
-                hoverTimer = setTimeout(() => preloadPage(a.href), 35);
+                hoverTimer = setTimeout(() => preloadPage(a.href), 25);
             }, { passive: true });
 
             document.addEventListener('mouseout', function(e) {
@@ -672,84 +677,191 @@
                 preloadPage(a.href);
             }, { passive: true });
 
-            async function navigateTo(url, pushState = true) {
-                if (isNavigating) return;
-                isNavigating = true;
+            function getSkeletonHtml(urlStr) {
+                try {
+                    const u = new URL(urlStr, window.location.origin);
+                    const path = u.pathname;
 
+                    if (path.includes('/product/')) {
+                        return `
+                            <div class="animate-pulse space-y-8 py-4 max-w-5xl mx-auto">
+                                <div class="h-4 bg-slate-200 rounded w-48"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                    <div class="aspect-square bg-slate-200 rounded-2xl w-full"></div>
+                                    <div class="space-y-5">
+                                        <div class="h-4 bg-slate-200 rounded w-28"></div>
+                                        <div class="h-8 bg-slate-200 rounded w-3/4"></div>
+                                        <div class="h-6 bg-slate-200 rounded w-32"></div>
+                                        <div class="space-y-2 pt-2">
+                                            <div class="h-4 bg-slate-100 rounded w-full"></div>
+                                            <div class="h-4 bg-slate-100 rounded w-5/6"></div>
+                                            <div class="h-4 bg-slate-100 rounded w-4/6"></div>
+                                        </div>
+                                        <div class="h-12 bg-slate-200 rounded-xl w-full mt-4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (path === '/about' || path === '/contact') {
+                        return `
+                            <div class="animate-pulse space-y-10 py-6 max-w-4xl mx-auto text-center">
+                                <div class="h-4 bg-slate-200 rounded w-28 mx-auto"></div>
+                                <div class="h-10 bg-slate-200 rounded-xl w-72 mx-auto"></div>
+                                <div class="h-4 bg-slate-100 rounded w-96 max-w-full mx-auto"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+                                    <div class="h-44 bg-slate-100 rounded-2xl border border-slate-200/50 p-6 space-y-3">
+                                        <div class="w-10 h-10 bg-slate-200 rounded-xl"></div>
+                                        <div class="h-5 bg-slate-200 rounded w-3/4"></div>
+                                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                                    </div>
+                                    <div class="h-44 bg-slate-100 rounded-2xl border border-slate-200/50 p-6 space-y-3">
+                                        <div class="w-10 h-10 bg-slate-200 rounded-xl"></div>
+                                        <div class="h-5 bg-slate-200 rounded w-3/4"></div>
+                                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                                    </div>
+                                    <div class="h-44 bg-slate-100 rounded-2xl border border-slate-200/50 p-6 space-y-3">
+                                        <div class="w-10 h-10 bg-slate-200 rounded-xl"></div>
+                                        <div class="h-5 bg-slate-200 rounded w-3/4"></div>
+                                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="animate-pulse space-y-8 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="h-8 bg-slate-200 rounded-xl w-48"></div>
+                                <div class="h-8 bg-slate-100 rounded-xl w-32 hidden sm:block"></div>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                                ${Array(8).fill(0).map(() => `
+                                    <div class="bg-white rounded-2xl border border-slate-100 p-3.5 space-y-3">
+                                        <div class="aspect-square bg-slate-200 rounded-xl w-full"></div>
+                                        <div class="h-3.5 bg-slate-200 rounded w-3/4"></div>
+                                        <div class="h-3.5 bg-slate-200 rounded w-1/2"></div>
+                                        <div class="h-9 bg-slate-200 rounded-xl w-full mt-2"></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } catch(e) {
+                    return `<div class="animate-pulse py-12 text-center text-slate-300">Loading...</div>`;
+                }
+            }
+
+            function applyNewHtml(html, url) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newMain = doc.getElementById('main-content') || doc.querySelector('main');
+                const currentMain = document.getElementById('main-content') || document.querySelector('main');
+
+                if (!newMain || !currentMain) {
+                    window.location.href = url;
+                    return;
+                }
+
+                // Swap main page content
+                currentMain.innerHTML = newMain.innerHTML;
+
+                // Update page title
+                if (doc.title) {
+                    document.title = doc.title;
+                }
+
+                // Sync cart badges if updated
+                const newBadge = doc.getElementById('navbar-cart-badge');
+                const curBadge = document.getElementById('navbar-cart-badge');
+                if (newBadge && curBadge) {
+                    curBadge.textContent = newBadge.textContent;
+                    if (newBadge.classList.contains('hidden')) curBadge.classList.add('hidden');
+                    else curBadge.classList.remove('hidden');
+                }
+                const newDrawerBadge = doc.getElementById('mobile-drawer-cart-badge');
+                const curDrawerBadge = document.getElementById('mobile-drawer-cart-badge');
+                if (newDrawerBadge && curDrawerBadge) {
+                    curDrawerBadge.textContent = newDrawerBadge.textContent;
+                    if (newDrawerBadge.classList.contains('hidden')) curDrawerBadge.classList.add('hidden');
+                    else curDrawerBadge.classList.remove('hidden');
+                }
+
+                // Re-execute scripts embedded inside new main content
+                const scripts = currentMain.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.textContent = oldScript.textContent;
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+
+                // Re-initialize page-specific behaviors
+                if (typeof initCategoryAccordion === 'function') {
+                    initCategoryAccordion();
+                }
+
+                document.dispatchEvent(new CustomEvent('page:navigated', { detail: { url } }));
+            }
+
+            async function navigateTo(url, pushState = true) {
+                const currentMain = document.getElementById('main-content') || document.querySelector('main');
+                if (!currentMain) {
+                    window.location.href = url;
+                    return;
+                }
+
+                // Check in-memory or sessionStorage cache
+                let cachedHtml = null;
+                const memVal = pageCache.get(url);
+                if (typeof memVal === 'string') {
+                    cachedHtml = memVal;
+                } else if (typeof sessionStorage !== 'undefined') {
+                    try {
+                        const stored = sessionStorage.getItem('spa_cache_' + url);
+                        if (stored) cachedHtml = stored;
+                    } catch(e) {}
+                }
+
+                // 1. Instantly update browser history URL (0ms)
+                if (pushState) {
+                    window.history.pushState({ url }, '', url);
+                }
+
+                // 2. Instantly update active navigation indicators (0ms)
+                updateActiveNav(url);
+
+                // 3. Instantly scroll to top (0ms)
+                window.scrollTo({ top: 0, behavior: 'instant' });
+
+                // 4. Instantly close mobile drawer if open (0ms)
+                if (typeof closeMobileDrawer === 'function') {
+                    closeMobileDrawer();
+                }
+
+                // 5. If cached HTML is available: SWAP VIEW INSTANTLY (0ms)!
+                if (cachedHtml && typeof cachedHtml === 'string') {
+                    applyNewHtml(cachedHtml, url);
+                    // Silently refresh in background (Stale-While-Revalidate)
+                    fetchHtml(url, true).then(freshHtml => {
+                        if (freshHtml && freshHtml !== cachedHtml) {
+                            applyNewHtml(freshHtml, url);
+                        }
+                    }).catch(() => {});
+                    return;
+                }
+
+                // 6. If not yet cached: RENDER CONTEXTUAL SKELETON SHELL INSTANTLY (0ms)!
+                currentMain.innerHTML = getSkeletonHtml(url);
+
+                // 7. Background stream content and replace skeleton when resolved
                 try {
                     const html = await fetchHtml(url);
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-
-                    const newMain = doc.getElementById('main-content') || doc.querySelector('main');
-                    const currentMain = document.getElementById('main-content') || document.querySelector('main');
-
-                    if (!newMain || !currentMain) {
-                        window.location.href = url;
-                        return;
-                    }
-
-                    // 1. Swap main page content instantly without page reload
-                    currentMain.innerHTML = newMain.innerHTML;
-
-                    // 2. Update page title
-                    if (doc.title) {
-                        document.title = doc.title;
-                    }
-
-                    // 3. Update browser history
-                    if (pushState) {
-                        window.history.pushState({ url }, '', url);
-                    }
-
-                    // 4. Update active navigation styling
-                    updateActiveNav(url);
-
-                    // 5. Sync cart badges if updated
-                    const newBadge = doc.getElementById('navbar-cart-badge');
-                    const curBadge = document.getElementById('navbar-cart-badge');
-                    if (newBadge && curBadge) {
-                        curBadge.textContent = newBadge.textContent;
-                        if (newBadge.classList.contains('hidden')) curBadge.classList.add('hidden');
-                        else curBadge.classList.remove('hidden');
-                    }
-                    const newDrawerBadge = doc.getElementById('mobile-drawer-cart-badge');
-                    const curDrawerBadge = document.getElementById('mobile-drawer-cart-badge');
-                    if (newDrawerBadge && curDrawerBadge) {
-                        curDrawerBadge.textContent = newDrawerBadge.textContent;
-                        if (newDrawerBadge.classList.contains('hidden')) curDrawerBadge.classList.add('hidden');
-                        else curDrawerBadge.classList.remove('hidden');
-                    }
-
-                    // 6. Scroll smoothly to top
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-
-                    // 7. Close mobile drawer if open
-                    if (typeof closeMobileDrawer === 'function') {
-                        closeMobileDrawer();
-                    }
-
-                    // 8. Re-execute scripts embedded inside new main content
-                    const scripts = currentMain.querySelectorAll('script');
-                    scripts.forEach(oldScript => {
-                        const newScript = document.createElement('script');
-                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                        newScript.textContent = oldScript.textContent;
-                        oldScript.parentNode.replaceChild(newScript, oldScript);
-                    });
-
-                    // 9. Re-initialize page-specific behaviors
-                    if (typeof initCategoryAccordion === 'function') {
-                        initCategoryAccordion();
-                    }
-
-                    document.dispatchEvent(new CustomEvent('page:navigated', { detail: { url } }));
-
+                    applyNewHtml(html, url);
                 } catch (err) {
-                    // Safe graceful fallback to native navigation
                     window.location.href = url;
-                } finally {
-                    isNavigating = false;
                 }
             }
 
@@ -807,6 +919,50 @@
                     });
                 } catch(e) {}
             }
+
+            // Eager idle preloading of all main storefront routes & viewport product links
+            function initIdlePreload() {
+                const defaultRoutes = [
+                    '{{ route("storefront.index") }}',
+                    '{{ route("storefront.products") }}',
+                    '{{ route("storefront.about") }}',
+                    '{{ route("storefront.contact") }}'
+                ];
+
+                defaultRoutes.forEach(routeUrl => {
+                    if (routeUrl !== window.location.href) {
+                        preloadPage(routeUrl);
+                    }
+                });
+
+                if ('IntersectionObserver' in window) {
+                    const linkObserver = new IntersectionObserver((entries, obs) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const a = entry.target;
+                                if (isNavigable(a)) {
+                                    preloadPage(a.href);
+                                }
+                                obs.unobserve(a);
+                            }
+                        });
+                    }, { rootMargin: '120px' });
+
+                    document.querySelectorAll('a[href*="/product/"]').forEach(el => linkObserver.observe(el));
+
+                    document.addEventListener('page:navigated', () => {
+                        document.querySelectorAll('a[href*="/product/"]').forEach(el => linkObserver.observe(el));
+                    });
+                }
+            }
+
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(initIdlePreload, { timeout: 1500 });
+            } else {
+                setTimeout(initIdlePreload, 250);
+            }
+        })();
+    </script>
         })();
     </script>
     @stack('scripts')

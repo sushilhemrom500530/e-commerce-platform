@@ -41,14 +41,26 @@ class AppServiceProvider extends ServiceProvider
             } elseif (isset($data['homeCategories']) && $data['homeCategories'] instanceof Collection) {
                 $categories = $data['homeCategories'];
             } else {
-                try {
-                    $categories = Category::where('is_active', true)
-                        ->select('id', 'name', 'slug')
-                        ->orderBy('name')
-                        ->take(8)
-                        ->get();
-                } catch (\Throwable) {
-                    $categories = collect();
+                $cachePath = storage_path('framework/cache/nav_categories.json');
+                if (file_exists($cachePath)) {
+                    $json = @file_get_contents($cachePath);
+                    $decoded = $json ? json_decode($json, false) : null;
+                    if (is_array($decoded) && ! empty($decoded)) {
+                        $categories = collect($decoded);
+                    }
+                }
+
+                if (! isset($categories)) {
+                    try {
+                        $categories = Category::where('is_active', true)
+                            ->select('id', 'name', 'slug')
+                            ->orderBy('name')
+                            ->take(8)
+                            ->get();
+                        @file_put_contents($cachePath, json_encode($categories->toArray()));
+                    } catch (\Throwable) {
+                        $categories = collect();
+                    }
                 }
             }
 

@@ -35,6 +35,14 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+
+        static::saved(function (): void {
+            @unlink(storage_path('framework/cache/nav_categories.json'));
+        });
+
+        static::deleted(function (): void {
+            @unlink(storage_path('framework/cache/nav_categories.json'));
+        });
     }
 
     public function getRouteKeyName(): string
