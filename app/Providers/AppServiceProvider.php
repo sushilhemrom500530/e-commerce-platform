@@ -6,6 +6,7 @@ use App\Models\Category;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -34,18 +35,25 @@ class AppServiceProvider extends ServiceProvider
 
         // Share navbar categories efficiently across storefront layout without redundant queries
         View::composer('layouts.app', function ($view) {
-            try {
-                $categories = Category::where('is_active', true)
-                    ->select('id', 'name', 'slug')
-                    ->orderBy('name')
-                    ->take(8)
-                    ->get();
-            } catch (\Throwable) {
-                $categories = collect();
+            $data = $view->getData();
+            if (isset($data['categories']) && $data['categories'] instanceof Collection) {
+                $categories = $data['categories'];
+            } elseif (isset($data['homeCategories']) && $data['homeCategories'] instanceof Collection) {
+                $categories = $data['homeCategories'];
+            } else {
+                try {
+                    $categories = Category::where('is_active', true)
+                        ->select('id', 'name', 'slug')
+                        ->orderBy('name')
+                        ->take(8)
+                        ->get();
+                } catch (\Throwable) {
+                    $categories = collect();
+                }
             }
 
             $view->with('navCategories', $categories->take(6))
-                ->with('mobileNavCategories', $categories);
+                ->with('mobileNavCategories', $categories->take(8));
         });
 
         // Global API baseline rate limiting (matching Express 200 req/min)

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,19 +19,26 @@ class StorefrontController extends Controller
         $featuredSlugs = ['electronics', 'fashion', 'home-living', 'sports', 'books'];
 
         $homeCategories = Category::where('is_active', true)
-            ->whereHas('products', fn ($q) => $q->where('is_active', true))
-            ->with([
-                'products' => fn ($q) => $q->where('is_active', true)->with('subcategory')->latest()->take(4),
-            ])
-            ->withCount(['products' => fn ($q) => $q->where('is_active', true)])
+            ->whereIn('slug', $featuredSlugs)
             ->get()
-            ->sortBy(function ($cat) use ($featuredSlugs) {
-                $idx = array_search($cat->slug, $featuredSlugs);
+            ->sortBy(fn ($cat) => array_search($cat->slug, $featuredSlugs))
+            ->values();
 
-                return $idx === false ? 99 : $idx;
-            })
-            ->values()
-            ->take(5);
+        $categoryIds = $homeCategories->pluck('id')->all();
+
+        $products = Product::where('is_active', true)
+            ->whereIn('category_id', $categoryIds)
+            ->with('subcategory')
+            ->latest('id')
+            ->get();
+
+        $productsByCategory = $products->groupBy('category_id');
+
+        foreach ($homeCategories as $category) {
+            $catProducts = $productsByCategory->get($category->id, collect());
+            $category->setRelation('products', $catProducts->take(4));
+            $category->products_count = $catProducts->count();
+        }
 
         if ($request->expectsJson() && ! $request->header('X-Inertia')) {
             return $this->sendResponse($homeCategories, 'Catalog retrieved successfully.');
@@ -51,28 +57,30 @@ class StorefrontController extends Controller
             ->orderBy('name')
             ->get();
 
+        $allCategoriesById = $categories->keyBy('id');
+        $allSubcategoriesById = $categories->pluck('subcategories')->flatten()->keyBy('id');
+
         $selectedCategory = null;
         if ($request->filled('category')) {
             $catParam = (string) $request->query('category');
             $selectedCategory = is_numeric($catParam)
-                ? Category::where('id', (int) $catParam)->first()
-                : Category::where('slug', $catParam)->first();
+                ? $allCategoriesById->get((int) $catParam)
+                : $categories->firstWhere('slug', $catParam);
         }
 
         $selectedSubcategory = null;
         if ($request->filled('subcategory')) {
             $subParam = (string) $request->query('subcategory');
             $selectedSubcategory = is_numeric($subParam)
-                ? Subcategory::where('id', (int) $subParam)->first()
-                : Subcategory::where('slug', $subParam)->first();
+                ? $allSubcategoriesById->get((int) $subParam)
+                : $allSubcategoriesById->firstWhere('slug', $subParam);
 
             if ($selectedSubcategory && ! $selectedCategory) {
-                $selectedCategory = $selectedSubcategory->category;
+                $selectedCategory = $allCategoriesById->get($selectedSubcategory->category_id);
             }
         }
 
-        $query = Product::with(['category', 'subcategory'])
-            ->where('is_active', true);
+        $query = Product::where('is_active', true);
 
         if ($selectedCategory) {
             $query->where('category_id', $selectedCategory->id);
@@ -100,6 +108,11 @@ class StorefrontController extends Controller
         };
 
         $products = $query->paginate(9)->withQueryString();
+
+        $products->each(function ($product) use ($allCategoriesById, $allSubcategoriesById) {
+            $product->setRelation('category', $allCategoriesById->get($product->category_id));
+            $product->setRelation('subcategory', $allSubcategoriesById->get($product->subcategory_id));
+        });
 
         if ($request->expectsJson() && ! $request->header('X-Inertia')) {
             return $this->sendResponse([
